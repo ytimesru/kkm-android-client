@@ -1,7 +1,6 @@
 package ru.ytimes.client.kkm.android.printer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import android.util.Log;
 
 import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
@@ -11,22 +10,22 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
  */
 
 public class LogPrinter implements Printer {
-    private static final Logger logger = LoggerFactory.getLogger(LogPrinter.class);
+    private static final String TAG = "LogPrinter";
 
     public void reportZ() throws PrinterException {
-        logger.info("do z report");
+        Log.i(TAG, "do z report");
     }
 
     public void reportX() throws PrinterException {
-        logger.info("do x report");
+        Log.i(TAG, "do x report");
     }
 
     public void printCheck(PrintCheckCommandRecord record) throws PrinterException {
-        logger.info("do print check");
+        Log.i(TAG, "do print check");
     }
 
     public void printNewGuest(NewGuestCommandRecord record) throws PrinterException {
-        logger.info("print new guest");
+        Log.i(TAG, "print new guest");
     }
 
 }

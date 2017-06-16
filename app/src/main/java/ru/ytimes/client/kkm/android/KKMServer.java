@@ -1,12 +1,12 @@
 package ru.ytimes.client.kkm.android;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
@@ -22,7 +22,7 @@ import ru.ytimes.client.kkm.android.record.Result;
  * Created by andrey on 27.05.17.
  */
 public class KKMServer extends WebSocketServer {
-    private static final Logger logger = LoggerFactory.getLogger(KKMServer.class);
+    private static final String TAG = "KKMServer";
 
     private Printer printer;
 
@@ -40,15 +40,15 @@ public class KKMServer extends WebSocketServer {
     }
 
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        logger.info(conn.getRemoteSocketAddress().getAddress().getHostAddress() + " connected");
+        Log.i(TAG, conn.getRemoteSocketAddress().getAddress().getHostAddress() + " connected");
     }
 
     public void onClose(WebSocket conn, int i, String s, boolean b) {
-        logger.info(conn.getRemoteSocketAddress().getAddress().getHostAddress() + " disconnected");
+        Log.i(TAG, conn.getRemoteSocketAddress().getAddress().getHostAddress() + " disconnected");
     }
 
     public void onMessage(WebSocket conn, String message) {
-        logger.info(conn.getRemoteSocketAddress().getAddress().getHostAddress() + ": " + message );
+        Log.i(TAG, conn.getRemoteSocketAddress().getAddress().getHostAddress() + ": " + message );
 
         ActionRecord action = parseMessage(conn, message, ActionRecord.class);
         if (action == null) {
@@ -127,14 +127,14 @@ public class KKMServer extends WebSocketServer {
     }
 
     public void onError(WebSocket conn, Exception e) {
-        logger.error(e.getMessage(), e);
+        Log.e(TAG, e.getMessage(), e);
         if( conn != null ) {
             processException(conn, e);
         }
     }
 
     public void onStart() {
-        logger.info("KKM server started");
+        Log.i(TAG, "KKM server started");
     }
 
 }
