@@ -42,4 +42,8 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.8'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.8'
     testCompile 'junit:junit:4.12'
+    compile files('src/main/libs/fptrproxylib.jar')
+    compile files('src/main/libs/fptrlib.jar')
+    compile files('src/main/libs/usblib.jar')
+    compile project(':fptrRes')
 }

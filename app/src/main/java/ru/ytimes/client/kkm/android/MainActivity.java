@@ -1,10 +1,16 @@
 package ru.ytimes.client.kkm.android;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
+import com.atol.drivers.fptr.Fptr;
+import com.atol.drivers.fptr.IFptr;
+import com.atol.drivers.fptr.settings.SettingsActivity;
 
 import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
 
@@ -23,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private KKMServer kkmServer;
+    private IFptr fptr = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +39,35 @@ public class MainActivity extends AppCompatActivity {
         if ("google_sdk".equals( Build.PRODUCT )) {
             java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
             java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
+        }
+
+        try{
+            fptr = new Fptr();
+            fptr.create(this);
+        } catch (NullPointerException ex){
+            fptr = null;
+        }
+    }
+
+    public void onClick(View view){
+        switch (view.getId()){
+            case R.id.button:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                intent.putExtra(SettingsActivity.DEVICE_SETTINGS, fptr.get_DeviceSettings());
+                startActivityForResult(intent, 1);
+
+                break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 1){
+            if(data!=null && data.getExtras()!=null){
+                String settings  = data.getExtras().getString(SettingsActivity.DEVICE_SETTINGS);
+                Toast.makeText(this, settings, Toast.LENGTH_LONG).show();
+
+            }
         }
     }
 

@@ -25,4 +25,15 @@
         app:layout_constraintRight_toRightOf="parent"
         tools:layout_editor_absoluteY="31dp" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FPTR"
+        android:id="@+id/button"
+        android:onClick="onClick"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="46dp" />
+
 </android.support.constraint.ConstraintLayout>
