@@ -1,6 +1,8 @@
 package ru.ytimes.client.kkm.android;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -47,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (true) {
             startServer();
+
+            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+            String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
+            if (settings != null && !settings.isEmpty()) {
+                printer.connect(getApplication(), settings, kkmStatusText);
+            }
         }
     }
 
@@ -70,6 +78,12 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode == 1){
             if(data!=null && data.getExtras()!=null){
                 String settings  = data.getExtras().getString(SettingsActivity.DEVICE_SETTINGS);
+
+                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(getString(R.string.settings_kkm), settings);
+                editor.commit();
+
                 printer.connect(getApplication(), settings, kkmStatusText);
             }
         }

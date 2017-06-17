@@ -3,4 +3,7 @@
     <string name="kkm_status_title">Статус подключения ККМ</string>
     <string name="kkm_status_hint">не подключено</string>
     <string name="kkm_settings_button">Изменить настройки KKM</string>
+
+
+    <string name="settings_kkm">settings_kkm</string>
 </resources>
