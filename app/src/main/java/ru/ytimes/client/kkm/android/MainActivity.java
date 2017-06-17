@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             int port = 4900;
             kkmServer = new KKMServer(port, "87fa");
             kkmServer.setPrinter(printer);
+            kkmServer.setStatusView(kkmStatusText);
             kkmServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(context));
             kkmServer.start();
             setStatus("Сервер успешно запущен на порту: " + port, "");

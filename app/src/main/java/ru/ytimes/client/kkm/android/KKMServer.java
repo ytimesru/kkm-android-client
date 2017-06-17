@@ -1,6 +1,11 @@
 package ru.ytimes.client.kkm.android;
 
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,6 +23,8 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 import ru.ytimes.client.kkm.android.record.Result;
 
+import static ru.ytimes.client.kkm.android.R.id.textView;
+
 /**
  * Created by andrey on 27.05.17.
  */
@@ -25,6 +32,7 @@ public class KKMServer extends WebSocketServer {
     private static final String TAG = "KKMServer";
 
     private Printer printer;
+    private TextView statusView;
 
     private String code;
 
@@ -39,22 +47,59 @@ public class KKMServer extends WebSocketServer {
         this.printer = printer;
     }
 
+    public void setStatusView(TextView statusView) {
+        this.statusView = statusView;
+    }
+
+    protected void setStatus(final String status, final boolean isError) {
+        Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                statusView.setText(status);
+                if (isError) {
+                    statusView.setTextColor(Color.parseColor("#ffcc00"));
+                }
+                else {
+                    statusView.setTextColor(Color.parseColor("#ff6699"));
+                }
+            }
+        };
+        handler.sendEmptyMessage(1);
+    }
+
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        Log.i(TAG, conn.getRemoteSocketAddress().getAddress().getHostAddress() + " connected");
+        String addr = "unknown";
+        if (conn.getRemoteSocketAddress() != null && conn.getRemoteSocketAddress().getAddress() != null) {
+            addr = conn.getRemoteSocketAddress().getAddress().getHostAddress();
+        }
+        Log.i(TAG, addr + " connected");
+        setStatus("Подключился: " + addr, false);
     }
 
     public void onClose(WebSocket conn, int i, String s, boolean b) {
-        Log.i(TAG, conn.getRemoteSocketAddress().getAddress().getHostAddress() + " disconnected");
+        String addr = "unknown";
+        if (conn.getRemoteSocketAddress() != null && conn.getRemoteSocketAddress().getAddress() != null) {
+            addr = conn.getRemoteSocketAddress().getAddress().getHostAddress();
+        }
+        Log.i(TAG, addr + " disconnected");
+        setStatus("Отключился: " + addr, false);
     }
 
     public void onMessage(WebSocket conn, String message) {
-        Log.i(TAG, conn.getRemoteSocketAddress().getAddress().getHostAddress() + ": " + message );
+        String addr = "unknown";
+        if (conn.getRemoteSocketAddress() != null && conn.getRemoteSocketAddress().getAddress() != null) {
+            addr = conn.getRemoteSocketAddress().getAddress().getHostAddress();
+        }
+
+        Log.i(TAG, addr + ": " + message );
+        setStatus("Получено сообщение от: " + addr, false);
 
         ActionRecord action = parseMessage(conn, message, ActionRecord.class);
         if (action == null) {
             return;
         }
         try {
+            setStatus("Обработка действия: " + addr + ", " + action.action, false);
             if ("newGuest".equals(action.action)) {
                 NewGuestCommandRecord record = parseMessage(conn, action.data, NewGuestCommandRecord.class);
                 checkCode(record.code);
@@ -78,14 +123,16 @@ public class KKMServer extends WebSocketServer {
             else {
                 sendError(conn, "kkm server", "Неизвестная команда: " + action.action);
             }
-
+            setStatus("Обработано действие: " + addr + ", " + action.action, false);
             Result result = new Result();
             result.success = true;
+
             try {
                 conn.send(mapper.writeValueAsString(result));
             }
             catch (Exception ex) {
                 ex.printStackTrace();
+                setStatus("Нет связи до: " + addr + ", " + ex.getMessage(), false);
             }
         }
         catch (PrinterException e) {
@@ -114,6 +161,7 @@ public class KKMServer extends WebSocketServer {
     }
 
     private void sendError(WebSocket conn, String errorClass, String message) {
+        setStatus("Ошибка: " + message, true);
         Result result = new Result();
         result.success = false;
         result.errorClass = errorClass;
