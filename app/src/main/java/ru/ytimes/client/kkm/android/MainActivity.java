@@ -1,15 +1,14 @@
 package ru.ytimes.client.kkm.android;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.TextView;
 
-import com.atol.drivers.fptr.Fptr;
-import com.atol.drivers.fptr.IFptr;
 import com.atol.drivers.fptr.settings.SettingsActivity;
 
 import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
@@ -23,50 +22,52 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 import ru.ytimes.client.kkm.android.printer.LogPrinter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
+    private TextView kkmStatusText;
+
     private KKMServer kkmServer;
-    private IFptr fptr = null;
+    private AtolPrinter printer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        printer = new AtolPrinter(getApplication());
+        kkmStatusText = (TextView)findViewById(R.id.kkmStatusView);
+
         if ("google_sdk".equals( Build.PRODUCT )) {
             java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
             java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
         }
+    }
 
-        try{
-            fptr = new Fptr();
-            fptr.create(this);
-        } catch (NullPointerException ex){
-            fptr = null;
+    protected void setStatus(String status, String isError) {
+        kkmStatusText.setText(status);
+        if ("true".equals(isError)) {
+            kkmStatusText.setTextColor(Color.parseColor("#ffcc00"));
+        }
+        else {
+            kkmStatusText.setTextColor(Color.parseColor("#ff6699"));
         }
     }
 
-    public void onClick(View view){
-        switch (view.getId()){
-            case R.id.button:
-                Intent intent = new Intent(this, SettingsActivity.class);
-                intent.putExtra(SettingsActivity.DEVICE_SETTINGS, fptr.get_DeviceSettings());
-                startActivityForResult(intent, 1);
-
-                break;
-        }
+    public void onKKMSettingsClick(View view){
+        Intent intent = new Intent(this, SettingsActivity.class);
+        intent.putExtra(SettingsActivity.DEVICE_SETTINGS, printer.getDefaultSettings());
+        startActivityForResult(intent, 1);
     }
 
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 1){
             if(data!=null && data.getExtras()!=null){
                 String settings  = data.getExtras().getString(SettingsActivity.DEVICE_SETTINGS);
-                Toast.makeText(this, settings, Toast.LENGTH_LONG).show();
-
+                printer.connect(getApplication(), settings, kkmStatusText);
             }
         }
     }
