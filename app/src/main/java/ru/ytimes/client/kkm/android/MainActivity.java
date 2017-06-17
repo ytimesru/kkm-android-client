@@ -23,7 +23,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import ru.ytimes.client.kkm.android.printer.AtolPrinter;
-import ru.ytimes.client.kkm.android.printer.LogPrinter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -44,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
         if ("google_sdk".equals( Build.PRODUCT )) {
             java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
             java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
+        }
+
+        if (true) {
+            startServer();
         }
     }
 
@@ -72,18 +75,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void startServer(View view) {
+    public boolean startServer() {
         Log.i(TAG, "start kkm server");
+        setStatus("Запуск сервера", "");
         try {
             SSLContext context = getSSLContext();
-            kkmServer = new KKMServer(4900, "87fa");
-            kkmServer.setPrinter(new LogPrinter());
+            int port = 4900;
+            kkmServer = new KKMServer(port, "87fa");
+            kkmServer.setPrinter(printer);
             kkmServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(context));
             kkmServer.start();
+            setStatus("Сервер успешно запущен на порту: " + port, "");
+            return true;
         }
         catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
-            throw new IllegalArgumentException(e.getMessage());
+            setStatus("Ошибка запуска сервера: " + e.getMessage(), "true");
+            return false;
         }
     }
 
