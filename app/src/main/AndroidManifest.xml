@@ -28,6 +28,24 @@
         </activity>
         <activity android:name="com.atol.drivers.fptr.settings.DeviceListActivity"
             android:configChanges="orientation|keyboardHidden"/>
+
+
+        <service
+            android:name="ru.ytimes.client.kkm.android.MainService"
+            android:enabled="true" >
+        </service>
+
+
+        <receiver
+            android:name="ru.ytimes.client.kkm.android.ServiceRestartBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped">
+            <intent-filter>
+                <action android:name="ytimes.restartService"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

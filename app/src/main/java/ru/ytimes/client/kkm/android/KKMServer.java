@@ -1,5 +1,7 @@
 package ru.ytimes.client.kkm.android;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,39 +34,26 @@ public class KKMServer extends WebSocketServer {
     private static final String TAG = "KKMServer";
 
     private Printer printer;
-    private TextView statusView;
-
+    private Context context;
     private String code;
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    public KKMServer(int port, String code) {
+    public KKMServer(int port, String code, Context context) {
         super(new InetSocketAddress(port));
         this.code = code;
+        this.context = context;
     }
 
     public void setPrinter(Printer printer) {
         this.printer = printer;
     }
 
-    public void setStatusView(TextView statusView) {
-        this.statusView = statusView;
-    }
-
-    protected void setStatus(final String status, final boolean isError) {
-        Handler handler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                statusView.setText(status);
-                if (isError) {
-                    statusView.setTextColor(Color.parseColor("#ffcc00"));
-                }
-                else {
-                    statusView.setTextColor(Color.parseColor("#ff6699"));
-                }
-            }
-        };
-        handler.sendEmptyMessage(1);
+    public void showMessage(String message) {
+        Intent local = new Intent();
+        local.setAction("ytimes.message");
+        local.putExtra("message", message);
+        context.sendBroadcast(local);
     }
 
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
@@ -73,7 +62,7 @@ public class KKMServer extends WebSocketServer {
             addr = conn.getRemoteSocketAddress().getAddress().getHostAddress();
         }
         Log.i(TAG, addr + " connected");
-        setStatus("Подключился: " + addr, false);
+        showMessage("Подключился: " + addr);
     }
 
     public void onClose(WebSocket conn, int i, String s, boolean b) {
@@ -82,7 +71,7 @@ public class KKMServer extends WebSocketServer {
             addr = conn.getRemoteSocketAddress().getAddress().getHostAddress();
         }
         Log.i(TAG, addr + " disconnected");
-        setStatus("Отключился: " + addr, false);
+        showMessage("Отключился: " + addr);
     }
 
     public void onMessage(WebSocket conn, String message) {
@@ -92,14 +81,14 @@ public class KKMServer extends WebSocketServer {
         }
 
         Log.i(TAG, addr + ": " + message );
-        setStatus("Получено сообщение от: " + addr, false);
+        showMessage("Получено сообщение от: " + addr);
 
         ActionRecord action = parseMessage(conn, message, ActionRecord.class);
         if (action == null) {
             return;
         }
         try {
-            setStatus("Обработка действия: " + addr + ", " + action.action, false);
+            showMessage("Обработка действия: " + addr + ", " + action.action);
             if ("newGuest".equals(action.action)) {
                 NewGuestCommandRecord record = parseMessage(conn, action.data, NewGuestCommandRecord.class);
                 checkCode(record.code);
@@ -123,7 +112,7 @@ public class KKMServer extends WebSocketServer {
             else {
                 sendError(conn, "kkm server", "Неизвестная команда: " + action.action);
             }
-            setStatus("Обработано действие: " + addr + ", " + action.action, false);
+            showMessage("Обработано действие: " + addr + ", " + action.action);
             Result result = new Result();
             result.success = true;
 
@@ -132,7 +121,7 @@ public class KKMServer extends WebSocketServer {
             }
             catch (Exception ex) {
                 ex.printStackTrace();
-                setStatus("Нет связи до: " + addr + ", " + ex.getMessage(), false);
+                showMessage("Нет связи до: " + addr + ", " + ex.getMessage());
             }
         }
         catch (PrinterException e) {
@@ -161,7 +150,7 @@ public class KKMServer extends WebSocketServer {
     }
 
     private void sendError(WebSocket conn, String errorClass, String message) {
-        setStatus("Ошибка: " + message, true);
+        showMessage("Ошибка: " + message);
         Result result = new Result();
         result.success = false;
         result.errorClass = errorClass;

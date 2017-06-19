@@ -1,7 +1,6 @@
 package ru.ytimes.client.kkm.android.printer;
 
-import android.app.Application;
-import android.widget.TextView;
+import android.content.Context;
 
 import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
@@ -12,7 +11,7 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 
 public interface Printer {
 
-    void connect(final Application application, final String settings, final TextView statusView);
+    void connect(final Context application, final String settings);
 
     void reportZ() throws PrinterException;
 

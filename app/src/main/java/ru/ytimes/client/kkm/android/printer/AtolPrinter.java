@@ -1,9 +1,9 @@
 package ru.ytimes.client.kkm.android.printer;
 
 import android.app.Application;
-import android.graphics.Color;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.widget.TextView;
 
 import com.atol.drivers.fptr.Fptr;
 import com.atol.drivers.fptr.IFptr;
@@ -19,24 +19,30 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 public class AtolPrinter implements Printer {
 
     private IFptr fptr = null;
-    private TextView statusView;
+    private Context context;
 
-    public AtolPrinter(Application application) {
+    public AtolPrinter(Context context) {
+        this.context = context;
+    }
+
+    public String getDefaultSettings(Context context) {
         try{
             fptr = new Fptr();
-            fptr.create(application);
+            fptr.create(context);
         } catch (NullPointerException ex){
             fptr = null;
         }
-    }
-
-    public String getDefaultSettings() {
         return fptr.get_DeviceSettings();
     }
 
-    public void connect(final Application application, final String settings, final TextView statusView) {
-        final AsyncTask<Void, String, Void> task = new AsyncTask<Void, String, Void>() {
+    public void stop() {
+        if (fptr != null) {
+            fptr.destroy();
+        }
+    }
 
+    public void connect(final Context application, final String settings) {
+        final AsyncTask<Void, String, Void> task = new AsyncTask<Void, String, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 fptr = new Fptr();
@@ -67,25 +73,22 @@ public class AtolPrinter implements Printer {
                 if (values == null || values.length == 0) {
                     return;
                 }
-                setStatus(values[0], values[1]);
-            }
-
-            protected void setStatus(String status, String isError) {
-                statusView.setText(status);
-                if ("true".equals(isError)) {
-                    statusView.setTextColor(Color.parseColor("#ffcc00"));
-                }
-                else {
-                    statusView.setTextColor(Color.parseColor("#ff6699"));
-                }
+                showMessage(values[0]);
             }
 
         };
         task.execute();
     }
 
+    public void showMessage(String message) {
+        Intent local = new Intent();
+        local.setAction("ytimes.message");
+        local.putExtra("message", message);
+        context.sendBroadcast(local);
+    }
+
     protected void checkError(IFptr fptr) throws PrinterException {
-        checkError(fptr, false);
+        checkError(fptr, true);
     }
 
     protected void checkError(IFptr fptr, boolean throwError) throws PrinterException {
