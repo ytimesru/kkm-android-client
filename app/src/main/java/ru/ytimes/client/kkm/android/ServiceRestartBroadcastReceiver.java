@@ -10,10 +10,11 @@ import android.util.Log;
  */
 
 public class ServiceRestartBroadcastReceiver extends BroadcastReceiver {
+    private static final String TAG = "YTIMES";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(ServiceRestartBroadcastReceiver.class.getSimpleName(), "Service Stops!");
+        Log.i(TAG, "Service Stops!");
         Intent i = new Intent(context, MainService.class);
         context.startService(i);
     }

@@ -18,7 +18,7 @@ import com.atol.drivers.fptr.settings.SettingsActivity;
 import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "YTIMES";
 
     private TextView kkmStatusText;
 
@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         stopService(serviceIntent);
         unregisterReceiver(uiReceiver);
-        Log.i(MainActivity.class.getSimpleName(), "onDestroy");
+        Log.i(TAG, "onDestroy activity");
         super.onDestroy();
     }
 
@@ -79,11 +79,11 @@ public class MainActivity extends AppCompatActivity {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (serviceClass.getName().equals(service.service.getClassName())) {
-                Log.i (MainActivity.class.getSimpleName(), "Service is already running");
+                Log.i (TAG, "Service is already running");
                 return true;
             }
         }
-        Log.i (MainActivity.class.getSimpleName(), "Service is not running");
+        Log.i (TAG, "Service is not running");
         return false;
     }
 

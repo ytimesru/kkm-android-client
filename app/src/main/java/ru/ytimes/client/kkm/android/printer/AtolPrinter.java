@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.atol.drivers.fptr.Fptr;
 import com.atol.drivers.fptr.IFptr;
@@ -17,6 +18,7 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
  */
 
 public class AtolPrinter implements Printer {
+    private static final String TAG = "YTIMES";
 
     private IFptr fptr = null;
     private Context context;
@@ -81,6 +83,7 @@ public class AtolPrinter implements Printer {
     }
 
     public void showMessage(String message) {
+        Log.i(TAG, message);
         Intent local = new Intent();
         local.setAction("ytimes.message");
         local.putExtra("message", message);

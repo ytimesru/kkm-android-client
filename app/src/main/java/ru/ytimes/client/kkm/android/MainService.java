@@ -28,7 +28,7 @@ import ru.ytimes.client.kkm.android.printer.AtolPrinter;
  */
 
 public class MainService extends Service {
-    private static final String TAG = "MainService";
+    private static final String TAG = "YTIMES";
     private KKMServer kkmServer;
     private AtolPrinter printer;
 
