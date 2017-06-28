@@ -1,6 +1,5 @@
 package ru.ytimes.client.kkm.android.printer;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -9,6 +8,8 @@ import android.util.Log;
 import com.atol.drivers.fptr.Fptr;
 import com.atol.drivers.fptr.IFptr;
 
+import ru.ytimes.client.kkm.android.record.GuestRecord;
+import ru.ytimes.client.kkm.android.record.GuestType;
 import ru.ytimes.client.kkm.android.record.ItemRecord;
 import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
@@ -112,7 +113,7 @@ public class AtolPrinter implements Printer {
     }
 
     @Override
-    public void reportZ() throws PrinterException {
+    synchronized public void reportZ() throws PrinterException {
         if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0) {
             checkError(fptr);
         }
@@ -134,7 +135,7 @@ public class AtolPrinter implements Printer {
     }
 
     @Override
-    public void reportX() throws PrinterException {
+    synchronized public void reportX() throws PrinterException {
         if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0)
             checkError(fptr);
         if (fptr.ApplySingleSettings() < 0)
@@ -150,7 +151,7 @@ public class AtolPrinter implements Printer {
     }
 
     @Override
-    public void printCheck(PrintCheckCommandRecord record) throws PrinterException {
+    synchronized public void printCheck(PrintCheckCommandRecord record) throws PrinterException {
         checkRecord(record);
 
         if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 1) < 0)
@@ -203,6 +204,64 @@ public class AtolPrinter implements Printer {
         closeCheck(0);
     }
 
+    //выставление счета
+    synchronized public void printPredCheck(PrintCheckCommandRecord record) throws PrinterException {
+        checkRecord(record);
+
+        printText("СЧЕТ");
+        printText("");
+        printText("ПОЗИЦИИ ОПЛАТЫ", IFptr.ALIGNMENT_LEFT, IFptr.WRAP_LINE);
+        for(int i = 0; i < record.itemList.size(); i++) {
+            ItemRecord r = record.itemList.get(i);
+            printText((i + 1) + ". " + r.name, IFptr.ALIGNMENT_LEFT, IFptr.WRAP_WORD);
+
+            double total = r.price * r.quantity;
+            printText(r.price + " x " + r.quantity + " = " + total, IFptr.ALIGNMENT_RIGHT, IFptr.WRAP_LINE);
+
+            if (r.discountSum != null && r.discountSum > 0) {
+                printText("Скидка: " + r.discountSum, IFptr.ALIGNMENT_RIGHT, IFptr.WRAP_LINE);
+            }
+            if (r.discountPercent != null && r.discountPercent > 0) {
+                printText("Скидка: " + r.discountPercent + "%", IFptr.ALIGNMENT_RIGHT, IFptr.WRAP_LINE);
+            }
+        }
+        printText("ИТОГО: " + record.moneySum, IFptr.ALIGNMENT_RIGHT, IFptr.WRAP_LINE);
+
+        if (GuestType.TIME.equals(record.type) && record.guestInfoList != null) {
+            printText("РАССЧИТЫВАЕМЫЕ ГОСТИ", IFptr.ALIGNMENT_LEFT, IFptr.WRAP_LINE);
+            int i = 1;
+            for(GuestRecord r: record.guestInfoList) {
+                String name = r.name;
+                if (r.card != null && !r.card.isEmpty()) {
+                    name += " (" + r.card + ")";
+                };
+                printText(i + ". " + name, IFptr.ALIGNMENT_LEFT, IFptr.WRAP_LINE);
+                printText("время прихода: " + r.startTime, IFptr.ALIGNMENT_RIGHT, IFptr.WRAP_LINE);
+                printText("проведенное время: " + r.minutes + " мин.", IFptr.ALIGNMENT_RIGHT, IFptr.WRAP_LINE);
+                i++;
+            }
+
+            printText("");
+            printText("");
+        }
+
+        if (GuestType.TOGO.equals(record.type)  && record.guestInfoList != null) {
+            for(GuestRecord r: record.guestInfoList) {
+                String name = r.name;
+                if (r.phone != null && !r.phone.isEmpty()) {
+                    name += ", " + r.phone;
+                }
+                printText(name, IFptr.ALIGNMENT_CENTER, IFptr.WRAP_LINE);
+                printText(r.message);
+            }
+
+            printText("");
+            printText("");
+        }
+
+        printHeader();
+    }
+
     private void cancelCheck() throws PrinterException {
         // Отменяем чек, если уже открыт. Ошибки "Неверный режим" и "Чек уже закрыт"
         // не являются ошибками, если мы хотим просто отменить чек
@@ -217,7 +276,7 @@ public class AtolPrinter implements Printer {
     }
 
     @Override
-    public void printNewGuest(NewGuestCommandRecord record) throws PrinterException {
+    synchronized public void printNewGuest(NewGuestCommandRecord record) throws PrinterException {
         printText(record.name);
         printText(record.startTime);
         if (record.barcodeNum != null && !record.barcodeNum.trim().isEmpty()) {
@@ -225,7 +284,8 @@ public class AtolPrinter implements Printer {
         }
         printText("");
         printText("");
-        printText("");
+
+        printHeader();
     }
 
 
@@ -326,6 +386,11 @@ public class AtolPrinter implements Printer {
         if (fptr.SetMode() < 0)
             checkError(fptr);
         if (fptr.PrintFooter() < 0)
+            checkError(fptr);
+    }
+
+    private void printHeader() throws PrinterException {
+        if (fptr.PrintHeader() < 0)
             checkError(fptr);
     }
 

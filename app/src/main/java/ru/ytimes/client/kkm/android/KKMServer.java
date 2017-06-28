@@ -31,7 +31,7 @@ import static ru.ytimes.client.kkm.android.R.id.textView;
  * Created by andrey on 27.05.17.
  */
 public class KKMServer extends WebSocketServer {
-    private static final String TAG = "KKMServer";
+    private static final String TAG = "YTIMES";
 
     private Printer printer;
     private Context context;
@@ -98,6 +98,11 @@ public class KKMServer extends WebSocketServer {
                 PrintCheckCommandRecord record = parseMessage(conn, action.data, PrintCheckCommandRecord.class);
                 checkCode(record.code);
                 printer.printCheck(record);
+            }
+            else if ("printPredCheck".equals(action.action)) {
+                PrintCheckCommandRecord record = parseMessage(conn, action.data, PrintCheckCommandRecord.class);
+                checkCode(record.code);
+                printer.printPredCheck(record);
             }
             else if ("reportX".equals(action.action)) {
                 ReportCommandRecord record = parseMessage(conn, action.data, ReportCommandRecord.class);
