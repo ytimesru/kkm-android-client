@@ -23,6 +23,7 @@ public class AtolPrinter implements Printer {
 
     private IFptr fptr = null;
     private Context context;
+    private String lastSettings;
 
     public AtolPrinter(Context context) {
         this.context = context;
@@ -44,7 +45,14 @@ public class AtolPrinter implements Printer {
         }
     }
 
+    public void reconnect() {
+        if (lastSettings != null) {
+            connect(context, lastSettings);
+        }
+    }
+
     public void connect(final Context application, final String settings) {
+        lastSettings = settings;
         final AsyncTask<Void, String, Void> task = new AsyncTask<Void, String, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -104,9 +112,9 @@ public class AtolPrinter implements Printer {
             }
             if (throwError) {
                 if (bpd != null) {
-                    throw new PrinterException(String.format("[%d] %s (%s)", rc, rd, bpd));
+                    throw new PrinterException(rc, String.format("[%d] %s (%s)", rc, rd, bpd));
                 } else {
-                    throw new PrinterException(String.format("[%d] %s", rc, rd));
+                    throw new PrinterException(rc, String.format("[%d] %s", rc, rd));
                 }
             }
         }
@@ -291,28 +299,28 @@ public class AtolPrinter implements Printer {
 
     private void checkRecord(PrintCheckCommandRecord record) throws PrinterException {
         if (record.itemList == null || record.itemList.isEmpty()) {
-            throw new PrinterException("Список оплаты пустой");
+            throw new PrinterException(0, "Список оплаты пустой");
         }
         if (record.moneySum == null && record.creditSum == null) {
-            throw new PrinterException("Итоговое значение для оплаты не задано");
+            throw new PrinterException(0, "Итоговое значение для оплаты не задано");
         }
         if (record.moneySum != null && record.moneySum == 0.0 &&
                 record.creditSum != null && record.creditSum == 0.0) {
-            throw new PrinterException("Итоговое значение для оплаты не задано");
+            throw new PrinterException(0, "Итоговое значение для оплаты не задано");
         }
         for(ItemRecord r: record.itemList) {
             if (r.name == null || r.name.trim().isEmpty()) {
-                throw new PrinterException("Не задано наименование позиции");
+                throw new PrinterException(0, "Не задано наименование позиции");
             }
             if (r.price == null) {
-                throw new PrinterException("Не задана цена позиции: " + r.name);
+                throw new PrinterException(0, "Не задана цена позиции: " + r.name);
             }
             if (r.quantity == null) {
-                throw new PrinterException("Не задано количество позиции: " + r.name);
+                throw new PrinterException(0, "Не задано количество позиции: " + r.name);
             }
 
             if (r.discountPercent != null && r.discountSum != null) {
-                throw new PrinterException("Нужно задать только один тип скидки - либо в процентах, либо в сумме. Позиция: " + r.name);
+                throw new PrinterException(0, "Нужно задать только один тип скидки - либо в процентах, либо в сумме. Позиция: " + r.name);
             }
         }
     }

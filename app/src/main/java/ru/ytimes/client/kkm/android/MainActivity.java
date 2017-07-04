@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         registerReceiver(uiReceiver, filter);
 
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
         String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
         if (settings != null && !settings.isEmpty()) {
             MainService.setSettings(settings);
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     public void onKKMSettingsClick(View view){
         Intent intent = new Intent(this, SettingsActivity.class);
 
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
         String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
         if (settings == null) {
             AtolPrinter atolPrinter = new AtolPrinter(this);
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             if(data!=null && data.getExtras()!=null){
                 String settings  = data.getExtras().getString(SettingsActivity.DEVICE_SETTINGS);
 
-                SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString(getString(R.string.settings_kkm), settings);
                 editor.commit();
