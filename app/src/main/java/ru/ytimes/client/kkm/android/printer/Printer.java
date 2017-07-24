@@ -21,6 +21,8 @@ public interface Printer {
 
     void printCheck(PrintCheckCommandRecord record) throws PrinterException;
 
+    void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException;
+
     void printPredCheck(PrintCheckCommandRecord record) throws PrinterException;
 
     void printNewGuest(NewGuestCommandRecord record) throws PrinterException ;

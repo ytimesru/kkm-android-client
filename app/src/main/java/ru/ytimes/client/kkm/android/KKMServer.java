@@ -121,6 +121,22 @@ public class KKMServer extends WebSocketServer {
                     }
                 }
             }
+            else if ("printReturnCheck".equals(action.action)) {
+                PrintCheckCommandRecord record = parseMessage(conn, action.data, PrintCheckCommandRecord.class);
+                checkCode(record.code);
+                try {
+                    printer.printReturnCheck(record);
+                }
+                catch (PrinterException e) {
+                    if (isDeviseNotAvailable(e)) {
+                        printer.reconnect();
+                        printer.printReturnCheck(record);
+                    }
+                    else {
+                        throw e;
+                    }
+                }
+            }
             else if ("printPredCheck".equals(action.action)) {
                 PrintCheckCommandRecord record = parseMessage(conn, action.data, PrintCheckCommandRecord.class);
                 checkCode(record.code);

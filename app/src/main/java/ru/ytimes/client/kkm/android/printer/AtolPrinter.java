@@ -226,6 +226,65 @@ public class AtolPrinter implements Printer {
         closeCheck(0);
     }
 
+    @Override
+    synchronized public void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException {
+        checkRecord(record);
+
+        if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 1) < 0)
+            checkError(fptr);
+        if (fptr.ApplySingleSettings() < 0)
+            checkError(fptr);
+
+        cancelCheck();
+
+        if (record.userFIO != null && !record.userPosition.isEmpty()) {
+            String fio = record.userFIO;
+            if (record.userPosition != null && !record.userPosition.isEmpty()) {
+                fio = record.userPosition + " " + fio;
+            }
+            setUserFIO(fio);
+        }
+
+        // Открываем чек продажи, попутно обработав превышение смены
+        try {
+            openCheck(IFptr.CHEQUE_TYPE_RETURN);
+        } catch (PrinterException e) {
+            // Проверка на превышение смены
+            if (fptr.get_ResultCode() == -3822) {
+                reportZ();
+                openCheck(IFptr.CHEQUE_TYPE_RETURN);
+            } else {
+                throw e;
+            }
+        }
+
+
+        for(ItemRecord r: record.itemList) {
+            int discountType = IFptr.DISCOUNT_SUMM;
+            double discountSum = r.discountSum != null ? r.discountSum : 0.0;
+
+            if (r.discountPercent != null) {
+                discountType = IFptr.DISCOUNT_PERCENT;
+                discountSum = r.discountPercent;
+            }
+
+            int tax = r.taxNumber != null ? r.taxNumber : 1;
+
+            registrationFZ54(r.name, r.price, r.quantity, discountType, discountSum, tax);
+        }
+
+        if (record.creditSum != null && record.creditSum > 0) {
+            payment(record.creditSum, 1);   //1 по карте
+        }
+
+        if (record.moneySum != null && record.moneySum > 0) {
+            payment(record.moneySum, 0);
+        }
+
+        // Закрываем чек
+        closeCheck(0);
+    }
+
     private void sendCheck(String address) throws PrinterException {
         if (fptr.put_FiscalPropertyNumber(1008) < 0) {
             checkError(fptr);
