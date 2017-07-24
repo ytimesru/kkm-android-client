@@ -169,6 +169,14 @@ public class AtolPrinter implements Printer {
 
         cancelCheck();
 
+        if (record.userFIO != null && !record.userPosition.isEmpty()) {
+            String fio = record.userFIO;
+            if (record.userPosition != null && !record.userPosition.isEmpty()) {
+                fio = record.userPosition + " " + fio;
+            }
+            setUserFIO(fio);
+        }
+
         // Открываем чек продажи, попутно обработав превышение смены
         try {
             openCheck(IFptr.CHEQUE_TYPE_SELL);
@@ -226,6 +234,21 @@ public class AtolPrinter implements Printer {
             checkError(fptr);
         }
         if (fptr.put_FiscalPropertyValue(address) < 0) {
+            checkError(fptr);
+        }
+        if (fptr.WriteFiscalProperty() < 0) {
+            checkError(fptr);
+        }
+    }
+
+    private void setUserFIO(String fio) throws PrinterException {
+        if (fptr.put_FiscalPropertyNumber(1021) < 0) {
+            checkError(fptr);
+        }
+        if (fptr.put_FiscalPropertyType(IFptr.FISCAL_PROPERTY_TYPE_STRING) < 0) {
+            checkError(fptr);
+        }
+        if (fptr.put_FiscalPropertyValue(fio) < 0) {
             checkError(fptr);
         }
         if (fptr.WriteFiscalProperty() < 0) {
