@@ -208,8 +208,29 @@ public class AtolPrinter implements Printer {
             payment(record.moneySum, 0);
         }
 
+        if (record.phone != null && !record.phone.isEmpty()) {
+            sendCheck(record.phone);
+        } else if (record.email != null && !record.email.isEmpty()) {
+            sendCheck(record.email);
+        }
+
         // Закрываем чек
         closeCheck(0);
+    }
+
+    private void sendCheck(String address) throws PrinterException {
+        if (fptr.put_FiscalPropertyNumber(1008) < 0) {
+            checkError(fptr);
+        }
+        if (fptr.put_FiscalPropertyType(IFptr.FISCAL_PROPERTY_TYPE_STRING) < 0) {
+            checkError(fptr);
+        }
+        if (fptr.put_FiscalPropertyValue(address) < 0) {
+            checkError(fptr);
+        }
+        if (fptr.WriteFiscalProperty() < 0) {
+            checkError(fptr);
+        }
     }
 
     //выставление счета
