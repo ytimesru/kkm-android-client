@@ -11,8 +11,6 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 
 public interface Printer {
 
-    void reconnect();
-
     void connect(final Context application, final String settings);
 
     void reportZ() throws PrinterException;

@@ -23,7 +23,6 @@ public class AtolPrinter implements Printer {
 
     private IFptr fptr = null;
     private Context context;
-    private String lastSettings;
 
     public AtolPrinter(Context context) {
         this.context = context;
@@ -45,14 +44,7 @@ public class AtolPrinter implements Printer {
         }
     }
 
-    public void reconnect() {
-        if (lastSettings != null) {
-            connect(context, lastSettings);
-        }
-    }
-
     public void connect(final Context application, final String settings) {
-        lastSettings = settings;
         final AsyncTask<Void, String, Void> task = new AsyncTask<Void, String, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -73,6 +65,9 @@ public class AtolPrinter implements Printer {
                         checkError(fptr);
                     }
                     publishProgress("Связь установлена", "");
+                    if (fptr.put_DeviceEnabled(false) < 0) {
+                        checkError(fptr);
+                    }
                 } catch (Exception e) {
                     publishProgress(e.toString(), "true");
                 }
@@ -89,6 +84,20 @@ public class AtolPrinter implements Printer {
 
         };
         task.execute();
+    }
+
+    private void doConnect() throws PrinterException {
+        showMessage("Связь установлена");
+        if (fptr.put_DeviceEnabled(true) < 0) {
+            checkError(fptr);
+        }
+    }
+
+    private void doDisconnect() throws PrinterException {
+        showMessage("Отключились от устройства");
+        if (fptr.put_DeviceEnabled(false) < 0) {
+            checkError(fptr);
+        }
     }
 
     public void showMessage(String message) {
@@ -122,46 +131,67 @@ public class AtolPrinter implements Printer {
 
     @Override
     synchronized public void reportZ() throws PrinterException {
-        if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0) {
-            checkError(fptr);
+        doConnect();
+        try {
+            if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0) {
+                checkError(fptr);
+            }
+            if (fptr.ApplySingleSettings() < 0) {
+                checkError(fptr);
+            }
+            if (fptr.put_Mode(IFptr.MODE_REPORT_CLEAR) < 0) {
+                checkError(fptr);
+            }
+            if (fptr.SetMode() < 0) {
+                checkError(fptr);
+            }
+            if (fptr.put_ReportType(IFptr.REPORT_Z) < 0) {
+                checkError(fptr);
+            }
+            if (fptr.Report() < 0) {
+                checkError(fptr);
+            }
         }
-        if (fptr.ApplySingleSettings() < 0) {
-            checkError(fptr);
-        }
-        if (fptr.put_Mode(IFptr.MODE_REPORT_CLEAR) < 0) {
-            checkError(fptr);
-        }
-        if (fptr.SetMode() < 0) {
-            checkError(fptr);
-        }
-        if (fptr.put_ReportType(IFptr.REPORT_Z) < 0) {
-            checkError(fptr);
-        }
-        if (fptr.Report() < 0) {
-            checkError(fptr);
+        finally {
+            doDisconnect();
         }
     }
 
     @Override
     synchronized public void reportX() throws PrinterException {
-        if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0)
-            checkError(fptr);
-        if (fptr.ApplySingleSettings() < 0)
-            checkError(fptr);
-        if (fptr.put_Mode(IFptr.MODE_REPORT_NO_CLEAR) < 0)
-            checkError(fptr);
-        if (fptr.SetMode() < 0)
-            checkError(fptr);
-        if (fptr.put_ReportType(IFptr.REPORT_X) < 0)
-            checkError(fptr);
-        if (fptr.Report() < 0)
-            checkError(fptr);
+        doConnect();
+        try {
+            if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0)
+                checkError(fptr);
+            if (fptr.ApplySingleSettings() < 0)
+                checkError(fptr);
+            if (fptr.put_Mode(IFptr.MODE_REPORT_NO_CLEAR) < 0)
+                checkError(fptr);
+            if (fptr.SetMode() < 0)
+                checkError(fptr);
+            if (fptr.put_ReportType(IFptr.REPORT_X) < 0)
+                checkError(fptr);
+            if (fptr.Report() < 0)
+                checkError(fptr);
+        }
+        finally {
+            doDisconnect();
+        }
     }
 
     @Override
     synchronized public void printCheck(PrintCheckCommandRecord record) throws PrinterException {
-        checkRecord(record);
+        doConnect();
+        try {
+            checkRecord(record);
+            doPrintCheck(record);
+        }
+        finally {
+            doDisconnect();
+        }
+    }
 
+    private void doPrintCheck(PrintCheckCommandRecord record) throws PrinterException {
         if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 1) < 0)
             checkError(fptr);
         if (fptr.ApplySingleSettings() < 0)
@@ -229,6 +259,16 @@ public class AtolPrinter implements Printer {
     @Override
     synchronized public void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException {
         checkRecord(record);
+        doConnect();
+        try {
+            doPrintReturnCheck(record);
+        }
+        finally {
+            doDisconnect();
+        }
+    }
+
+    private void doPrintReturnCheck(PrintCheckCommandRecord record) throws PrinterException {
 
         if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 1) < 0)
             checkError(fptr);
@@ -318,6 +358,17 @@ public class AtolPrinter implements Printer {
     //выставление счета
     synchronized public void printPredCheck(PrintCheckCommandRecord record) throws PrinterException {
         checkRecord(record);
+        doConnect();
+        try {
+            doPrintPredCheck(record);
+        }
+        finally {
+            doDisconnect();
+        }
+    }
+
+    private void doPrintPredCheck(PrintCheckCommandRecord record) throws PrinterException {
+        checkRecord(record);
 
         printText("СЧЕТ");
         printText("");
@@ -388,15 +439,21 @@ public class AtolPrinter implements Printer {
 
     @Override
     synchronized public void printNewGuest(NewGuestCommandRecord record) throws PrinterException {
-        printText(record.name);
-        printText(record.startTime);
-        if (record.barcodeNum != null && !record.barcodeNum.trim().isEmpty()) {
-            printBarcode(IFptr.BARCODE_TYPE_CODE39, record.barcodeNum, 100);
-        }
-        printText("");
-        printText("");
+        doConnect();
+        try {
+            printText(record.name);
+            printText(record.startTime);
+            if (record.barcodeNum != null && !record.barcodeNum.trim().isEmpty()) {
+                printBarcode(IFptr.BARCODE_TYPE_CODE39, record.barcodeNum, 100);
+            }
+            printText("");
+            printText("");
 
-        printHeader();
+            printHeader();
+        }
+        finally {
+            doDisconnect();
+        }
     }
 
 
