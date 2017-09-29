@@ -9,11 +9,18 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.atol.drivers.fptr.settings.SettingsActivity;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 
@@ -25,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private Intent serviceIntent;
     private BroadcastReceiver uiReceiver;
     private Context ctx;
+    private List<String> messages = new LinkedList<>();
+    private SimpleDateFormat formatter = new SimpleDateFormat("hh:mm");
 
     public Context getCtx() {
         return ctx;
@@ -43,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         ctx = this;
         serviceIntent = new Intent(getCtx(), MainService.class);
         kkmStatusText = (TextView)findViewById(R.id.kkmStatusView);
+        kkmStatusText.setMovementMethod(new ScrollingMovementMethod());
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("ytimes.message");
@@ -50,7 +60,29 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                kkmStatusText.setText(intent.getStringExtra("message"));
+                String mes = intent.getStringExtra("message");
+                mes = formatter.format(new Date()) + ": " + mes;
+                messages.add(mes);
+                if (messages.size() > 20) {
+                    messages.remove(0);
+                }
+                StringBuilder res = new StringBuilder();
+                for(String s: messages) {
+                    if (res.length() > 0) {
+                        res = res.append("\n");
+                    }
+                    res = res.append(s);
+                }
+                kkmStatusText.setText(res);
+
+                final Layout layout = kkmStatusText.getLayout();
+                if(layout != null){
+                    int scrollDelta = layout.getLineBottom(kkmStatusText.getLineCount() - 1)
+                            - kkmStatusText.getScrollY() - kkmStatusText.getHeight();
+                    if(scrollDelta > 0) {
+                        kkmStatusText.scrollBy(0, scrollDelta);
+                    }
+                }
             }
 
         };

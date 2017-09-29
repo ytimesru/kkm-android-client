@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">YTimes KKM Client</string>
     <string name="kkm_status_title">Статус подключения ККМ</string>
-    <string name="kkm_status_hint">не подключено</string>
-    <string name="kkm_settings_button">Изменить настройки KKM</string>
+    <string name="kkm_status_hint">задайте настройки</string>
+    <string name="kkm_settings_button">Настройки KKM</string>
     <string name="kkm_connect_button">Подключиться</string>
 
 

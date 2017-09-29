@@ -25,8 +25,6 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 import ru.ytimes.client.kkm.android.record.Result;
 
-import static ru.ytimes.client.kkm.android.R.id.textView;
-
 /**
  * Created by andrey on 27.05.17.
  */
