@@ -87,6 +87,15 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    public void onConnectButtonClick(View view) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+
+        SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
+        String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
+        MainService.setSettings(settings);
+        stopService(serviceIntent);
+    }
+
     public void onKKMSettingsClick(View view){
         Intent intent = new Intent(this, SettingsActivity.class);
 

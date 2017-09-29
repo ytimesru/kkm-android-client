@@ -18,10 +18,14 @@ import java.security.KeyStore;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import fi.iki.elonen.NanoHTTPD;
 import ru.ytimes.client.kkm.android.printer.AtolPrinter;
+import ru.ytimes.client.kkm.android.printer.Printer;
+import ru.ytimes.client.kkm.android.printer.TestPrinter;
 
 /**
  * Created by andrey on 18.06.17.
@@ -30,7 +34,8 @@ import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 public class MainService extends Service {
     private static final String TAG = "YTIMES";
     private KKMServer kkmServer;
-    private AtolPrinter printer;
+    private KKMWebServer kkmWebServer;
+    private Printer printer;
 
     private static String settings;
 
@@ -89,6 +94,13 @@ public class MainService extends Service {
         }
         catch (Exception e) {
         }
+        try {
+            if (kkmWebServer != null) {
+                kkmWebServer.stop();
+            }
+        }
+        catch (Exception e) {
+        }
         if (printer != null) {
             printer.stop();
         }
@@ -96,7 +108,8 @@ public class MainService extends Service {
 
     public void reconnect(String settings) {
         stop();
-        printer = new AtolPrinter(getApplication());
+        //printer = new AtolPrinter(getApplication());
+        printer = new TestPrinter(getApplication());
         printer.connect(getApplication(), settings);
         startServer();
     }
@@ -112,13 +125,27 @@ public class MainService extends Service {
             kkmServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(context));
             kkmServer.start();
             showMessage("Сервер успешно запущен на порту: " + port);
-            return true;
         }
         catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
             showMessage("Ошибка запуска сервера: " + e.getMessage());
             return false;
         }
+
+        try {
+            SSLContext context = getSSLContext();
+            int port = 4901;
+            kkmWebServer = new KKMWebServer(port, context.getServerSocketFactory(), "87fa", getApplication());
+            kkmWebServer.setPrinter(printer);
+            kkmWebServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+            showMessage("Веб сервер успешно запущен на порту: " + port);
+        }
+        catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+            showMessage("Ошибка запуска сервера: " + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
     public void showMessage(String message) {
@@ -174,6 +201,5 @@ public class MainService extends Service {
         SSLContext.setDefault(sslContext);
         return sslContext;
     }
-
 
 }

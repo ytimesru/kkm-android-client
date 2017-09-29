@@ -13,6 +13,8 @@ public interface Printer {
 
     void connect(final Context application, final String settings);
 
+    void stop();
+
     void reportZ() throws PrinterException;
 
     void reportX() throws PrinterException;
