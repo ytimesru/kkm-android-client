@@ -108,19 +108,22 @@ public class MainService extends Service {
 
     public void reconnect(String settings) {
         stop();
-        //printer = new AtolPrinter(getApplication());
-        printer = new TestPrinter(getApplication());
+        printer = new AtolPrinter(getApplication());
+        //printer = new TestPrinter(getApplication());
         printer.connect(getApplication(), settings);
         startServer();
     }
 
     public boolean startServer() {
+        System.setProperty("AccessControlAllowHeader", "*");
+        String code = "hdlruytsxvn";
+
         Log.i(TAG, "start kkm server");
-        showMessage("Запуск сервера");
+        showMessage("Запуск сервера. Код подтверждения: " + code);
         try {
             SSLContext context = getSSLContext();
             int port = 4900;
-            kkmServer = new KKMServer(port, "87fa", getApplication());
+            kkmServer = new KKMServer(port, code, getApplication());
             kkmServer.setPrinter(printer);
             kkmServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(context));
             kkmServer.start();
@@ -135,7 +138,7 @@ public class MainService extends Service {
         try {
             SSLContext context = getSSLContext();
             int port = 4901;
-            kkmWebServer = new KKMWebServer(port, context.getServerSocketFactory(), "87fa", getApplication());
+            kkmWebServer = new KKMWebServer(port, context.getServerSocketFactory(), code, getApplication());
             kkmWebServer.setPrinter(printer);
             kkmWebServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
             showMessage("Веб сервер успешно запущен на порту: " + port);

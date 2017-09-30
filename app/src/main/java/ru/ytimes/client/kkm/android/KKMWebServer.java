@@ -6,9 +6,11 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOError;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.SSLServerSocketFactory;
 
@@ -53,32 +55,48 @@ public class KKMWebServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        final HashMap<String, String> map = new HashMap<String, String>();
-        try {
-            session.parseBody(map);
-            final String json = map.get("postData");
-
-            Log.i(TAG, "received: " + json);
-
-            Result res = new Result();
-            res.success = true;
+        Method method = session.getMethod();
+        NanoHTTPD.Response response = null;
+        if (method.equals(Method.POST)) {
+            final HashMap<String, String> map = new HashMap<String, String>();
             try {
-                processAction(json);
-            }
-            catch (Exception e) {
-                showMessage("Error: " + e.getMessage());
+                session.parseBody(map);
+                final String json = map.get("postData");
+
+                Log.i(TAG, "received: " + json);
+
+                Result res = new Result();
+                res.success = true;
+                try {
+                    processAction(json);
+                } catch (Exception e) {
+                    showMessage("Error: " + e.getMessage());
+                    Log.e(TAG, e.getMessage(), e);
+                    res.success = false;
+                    res.errorMessage = e.getMessage();
+                    res.errorClass = e.getClass().getSimpleName();
+                }
+                response = newFixedLengthResponse(mapper.writeValueAsString(res));
+            } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-                res.success = false;
-                res.errorMessage = e.getMessage();
-                res.errorClass = e.getClass().getSimpleName();
+                showMessage("Error: " + e.getMessage());
+                response = newFixedLengthResponse("{success: false, errorMessage: \"" + e.getMessage() + "\"}");
             }
-            return newFixedLengthResponse(mapper.writeValueAsString(res));
         }
-        catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-            showMessage("Error: " + e.getMessage());
-            return newFixedLengthResponse("{success: false, errorMessage: \"" + e.getMessage() + "\"}");
+        else {
+            response = newFixedLengthResponse("");
         }
+        response = addCORSHeaders(response);
+        return response;
+    }
+
+    private Response addCORSHeaders(Response resp) {
+        resp.addHeader("Access-Control-Allow-Origin", "*");
+        resp.addHeader("Access-Control-Allow-Headers", "origin,accept,content-type");
+        resp.addHeader("Access-Control-Allow-Credentials", "true");
+        resp.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
+        resp.addHeader("Access-Control-Max-Age", "" + (42 * 60 * 60));
+        return resp;
     }
 
     private void processAction(String json) throws PrinterException, IOException {
