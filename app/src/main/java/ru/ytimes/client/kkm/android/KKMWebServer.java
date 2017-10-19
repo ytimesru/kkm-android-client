@@ -18,6 +18,7 @@ import fi.iki.elonen.NanoHTTPD;
 import ru.ytimes.client.kkm.android.printer.Printer;
 import ru.ytimes.client.kkm.android.printer.PrinterException;
 import ru.ytimes.client.kkm.android.record.ActionRecord;
+import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
 import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
@@ -135,8 +136,19 @@ public class KKMWebServer extends NanoHTTPD {
             checkCode(record.code);
             printer.reportZ();
         }
+        else if ("openSession".equals(action.action)) {
+            ReportCommandRecord record = parseMessage(action.data, ReportCommandRecord.class);
+            checkCode(record.code);
+            printer.startShift();
+        }
+        else if ("cashIncome".equals(action.action)) {
+            CashIncomeRecord record = parseMessage(action.data, CashIncomeRecord.class);
+            checkCode(record.code);
+            printer.cashIncome(record.sum);
+        }
         else {
-            throw new IllegalArgumentException("Неизвестная команда: " + action.action);
+            throw new IllegalArgumentException("Неизвестная команда: " + action.action + ". Вероятно требуется обновить " +
+                    "модуль для связи с кассой до последней версии");
         }
         showMessage("Обработано действие: " + action.action);
     }

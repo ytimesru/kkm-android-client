@@ -68,4 +68,14 @@ public class TestPrinter implements Printer {
         showMessage("test new guest");
     }
 
+    @Override
+    public void cashIncome(Integer summ) throws PrinterException {
+        showMessage("cash income");
+    }
+
+    @Override
+    public void startShift() throws PrinterException {
+        showMessage("start shift");
+    }
+
 }

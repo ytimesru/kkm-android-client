@@ -158,6 +158,49 @@ public class AtolPrinter implements Printer {
     }
 
     @Override
+    synchronized public void startShift() throws PrinterException {
+        doConnect();
+        try {
+            if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0)
+                checkError(fptr);
+            if (fptr.ApplySingleSettings() < 0)
+                checkError(fptr);
+            if (fptr.put_Mode(IFptr.MODE_REGISTRATION) < 0)
+                checkError(fptr);
+            if (fptr.SetMode() < 0)
+                checkError(fptr);
+            if (fptr.OpenSession() < 0)
+                checkError(fptr);
+        }
+        finally {
+            doDisconnect();
+        }
+    }
+
+    @Override
+    public void cashIncome(Integer sum) throws PrinterException {
+        doConnect();
+        try {
+            if (fptr.put_DeviceSingleSetting(IFptr.SETTING_USERPASSWORD, 30) < 0)
+                checkError(fptr);
+            if (fptr.ApplySingleSettings() < 0)
+                checkError(fptr);
+            if (fptr.put_Mode(IFptr.MODE_REGISTRATION) < 0)
+                checkError(fptr);
+            if (fptr.SetMode() < 0)
+                checkError(fptr);
+            if (fptr.put_Summ(sum) < 0)
+                checkError(fptr);
+            if (fptr.CashIncome() < 0) {
+                checkError(fptr);
+            }
+        }
+        finally {
+            doDisconnect();
+        }
+    }
+
+    @Override
     synchronized public void reportX() throws PrinterException {
         doConnect();
         try {

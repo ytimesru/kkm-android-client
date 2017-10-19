@@ -19,6 +19,10 @@ public interface Printer {
 
     void reportX() throws PrinterException;
 
+    void startShift() throws PrinterException;
+
+    void cashIncome(Integer summ) throws PrinterException;
+
     void printCheck(PrintCheckCommandRecord record) throws PrinterException;
 
     void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException;
