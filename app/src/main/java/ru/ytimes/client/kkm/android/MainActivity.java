@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,14 +14,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.atol.drivers.fptr.settings.SettingsActivity;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
-import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "YTIMES";
@@ -88,15 +83,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         registerReceiver(uiReceiver, filter);
-
-        SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
-        String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
-        if (settings != null && !settings.isEmpty()) {
-            MainService.setSettings(settings);
-            if (!isServiceRunning(MainService.class)) {
-                startService(serviceIntent);
-            }
-        }
+        startService(serviceIntent);
     }
 
     @Override
@@ -120,42 +107,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onConnectButtonClick(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
 
-        SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
-        String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
-        MainService.setSettings(settings);
         stopService(serviceIntent);
-    }
-
-    public void onKKMSettingsClick(View view){
-        Intent intent = new Intent(this, SettingsActivity.class);
-
-        SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
-        String settings = sharedPref.getString(getString(R.string.settings_kkm), null);
-        if (settings == null) {
-            AtolPrinter atolPrinter = new AtolPrinter(this);
-            settings = atolPrinter.getDefaultSettings(this);
-            atolPrinter.stop();
-        }
-        intent.putExtra(SettingsActivity.DEVICE_SETTINGS, settings);
-        startActivityForResult(intent, 1);
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 1){
-            if(data!=null && data.getExtras()!=null){
-                String settings  = data.getExtras().getString(SettingsActivity.DEVICE_SETTINGS);
-
-                SharedPreferences sharedPref = getSharedPreferences("kkm", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(getString(R.string.settings_kkm), settings);
-                editor.commit();
-
-                MainService.setSettings(settings);
-                stopService(serviceIntent);
-            }
-        }
     }
 
 }

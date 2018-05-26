@@ -8,5 +8,6 @@ public class Result {
     public Boolean success;
     public String errorClass;
     public String errorMessage;
+    public Object res;
 
 }

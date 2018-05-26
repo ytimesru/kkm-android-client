@@ -2,8 +2,12 @@ package ru.ytimes.client.kkm.android.printer;
 
 import android.content.Context;
 
+import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
+import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
+import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
 import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
+import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 
 /**
  * Created by andrey on 13.06.17.
@@ -11,24 +15,32 @@ import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 
 public interface Printer {
 
-    void connect(final Context application, final String settings);
+    void connect(Context application);
 
-    void stop();
+    boolean isConnected() throws PrinterException;
 
-    void reportZ() throws PrinterException;
+    void stop() throws PrinterException;
 
-    void reportX() throws PrinterException;
+    ModelInfoRecord getInfo() throws PrinterException;
 
-    void startShift() throws PrinterException;
+    void reportZ(AbstractCommandRecord record) throws PrinterException;
 
-    void cashIncome(Integer summ) throws PrinterException;
+    void reportX(ReportCommandRecord record) throws PrinterException;
+
+    void startShift(ReportCommandRecord record) throws PrinterException;
+
+    void cashIncome(CashIncomeRecord record) throws PrinterException;
+
+    void copyLastDoc(AbstractCommandRecord record) throws PrinterException;
+
+    void demoReport(AbstractCommandRecord record) throws PrinterException;
+
+    void ofdTestReport(AbstractCommandRecord record) throws PrinterException;
 
     void printCheck(PrintCheckCommandRecord record) throws PrinterException;
 
     void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException;
 
     void printPredCheck(PrintCheckCommandRecord record) throws PrinterException;
-
-    void printNewGuest(NewGuestCommandRecord record) throws PrinterException ;
 
 }

@@ -17,12 +17,6 @@ public class BootBroadcastReceiver  extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.i(TAG, "Auto start service");
 
-        SharedPreferences sharedPref = context.getSharedPreferences("kkm", Context.MODE_PRIVATE);
-        String settings = sharedPref.getString(context.getString(R.string.settings_kkm), null);
-        if (settings != null && !settings.isEmpty()) {
-            MainService.setSettings(settings);
-        }
-
         Intent i = new Intent(context, MainService.class);
         context.startService(i);
     }

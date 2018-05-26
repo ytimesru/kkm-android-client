@@ -5,6 +5,9 @@ package ru.ytimes.client.kkm.android.record;
  */
 public abstract class AbstractCommandRecord {
 
-    public String code;
+    //Кассир
+    public String userFIO;
+    public String userPosition;
+    public String userINN;
 
 }

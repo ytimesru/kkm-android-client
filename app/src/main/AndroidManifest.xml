@@ -25,15 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.atol.drivers.fptr.settings.SettingsActivity"
-            android:windowSoftInputMode="adjustPan">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-            </intent-filter>
-        </activity>
-        <activity android:name="com.atol.drivers.fptr.settings.DeviceListActivity"
-            android:configChanges="orientation|keyboardHidden"/>
-
 
         <service
             android:name="ru.ytimes.client.kkm.android.MainService"

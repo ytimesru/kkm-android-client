@@ -33,19 +33,8 @@ import ru.ytimes.client.kkm.android.printer.TestPrinter;
 
 public class MainService extends Service {
     private static final String TAG = "YTIMES";
-    private KKMServer kkmServer;
     private KKMWebServer kkmWebServer;
     private Printer printer;
-
-    private static String settings;
-
-    public static String getSettings() {
-        return settings;
-    }
-
-    public static void setSettings(String settings) {
-        MainService.settings = settings;
-    }
 
     @Nullable
     @Override
@@ -73,7 +62,8 @@ public class MainService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        reconnect(getSettings());
+        stop();
+        startServer();
         return START_STICKY;
     }
 
@@ -88,13 +78,6 @@ public class MainService extends Service {
 
     public void stop() {
         try {
-            if (kkmServer != null) {
-                kkmServer.stop();
-            }
-        }
-        catch (Exception e) {
-        }
-        try {
             if (kkmWebServer != null) {
                 kkmWebServer.stop();
             }
@@ -102,46 +85,30 @@ public class MainService extends Service {
         catch (Exception e) {
         }
         if (printer != null) {
-            printer.stop();
+            try {
+                printer.stop();
+            }
+            catch (Exception e) {
+            }
         }
-    }
-
-    public void reconnect(String settings) {
-        stop();
-        printer = new AtolPrinter(getApplication());
-        //printer = new TestPrinter(getApplication());
-        printer.connect(getApplication(), settings);
-        startServer();
     }
 
     public boolean startServer() {
         System.setProperty("AccessControlAllowHeader", "*");
-        String code = "hdlruytsxvn";
 
         Log.i(TAG, "start kkm server");
-        showMessage("Запуск сервера. Код подтверждения: " + code);
         try {
             SSLContext context = getSSLContext();
             int port = 4900;
-            kkmServer = new KKMServer(port, code, getApplication());
-            kkmServer.setPrinter(printer);
-            kkmServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(context));
-            kkmServer.start();
-            showMessage("Сервер успешно запущен на порту: " + port);
-        }
-        catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-            showMessage("Ошибка запуска сервера: " + e.getMessage());
-            return false;
-        }
-
-        try {
-            SSLContext context = getSSLContext();
-            int port = 4901;
-            kkmWebServer = new KKMWebServer(port, context.getServerSocketFactory(), code, getApplication());
-            kkmWebServer.setPrinter(printer);
+            kkmWebServer = new KKMWebServer(port, context.getServerSocketFactory(), getApplication());
             kkmWebServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
             showMessage("Веб сервер успешно запущен на порту: " + port);
+            try {
+                String ipAddress = Utils.getIPAddress(true);
+                showMessage("IP адрес: " + ipAddress);
+            }
+            catch (Exception e) {}
+            kkmWebServer.initPrinter();
         }
         catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
@@ -201,7 +168,6 @@ public class MainService extends Service {
         // initialize an ssl context to use these managers and set as default
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(keyManagers, trustManagers, null);
-        SSLContext.setDefault(sslContext);
         return sslContext;
     }
 

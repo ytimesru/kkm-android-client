@@ -4,8 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
+import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
+import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
 import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
+import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 
 /**
  * Created by andrey on 28.09.17.
@@ -29,53 +33,73 @@ public class TestPrinter implements Printer {
     }
 
     @Override
-    public void connect(Context application, String settings) {
+    public void connect(Context application) {
         showMessage("test connect");
     }
 
     @Override
-    public void stop() {
-        showMessage("test stop");
+    public boolean isConnected() throws PrinterException {
+        return true;
     }
 
     @Override
-    public void reportZ() throws PrinterException {
-        showMessage("test report z");
+    public void stop() throws PrinterException {
+        showMessage("stop");
     }
 
     @Override
-    public void reportX() throws PrinterException {
-        showMessage("test report x");
+    public ModelInfoRecord getInfo() throws PrinterException {
+        return new ModelInfoRecord();
+    }
+
+    @Override
+    public void reportZ(AbstractCommandRecord record) throws PrinterException {
+        showMessage("test: reportZ");
+    }
+
+    @Override
+    public void reportX(ReportCommandRecord record) throws PrinterException {
+        showMessage("test: reportX");
+    }
+
+    @Override
+    public void startShift(ReportCommandRecord record) throws PrinterException {
+        showMessage("test: start shift");
+    }
+
+    @Override
+    public void cashIncome(CashIncomeRecord record) throws PrinterException {
+        showMessage("test: cash");
+    }
+
+    @Override
+    public void copyLastDoc(AbstractCommandRecord record) throws PrinterException {
+
+    }
+
+    @Override
+    public void demoReport(AbstractCommandRecord record) throws PrinterException {
+
+    }
+
+    @Override
+    public void ofdTestReport(AbstractCommandRecord record) throws PrinterException {
+
     }
 
     @Override
     public void printCheck(PrintCheckCommandRecord record) throws PrinterException {
-        showMessage("test print check");
+
     }
 
     @Override
     public void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException {
-        showMessage("test return check");
+
     }
 
     @Override
     public void printPredCheck(PrintCheckCommandRecord record) throws PrinterException {
-        showMessage("test pred check");
-    }
 
-    @Override
-    public void printNewGuest(NewGuestCommandRecord record) throws PrinterException {
-        showMessage("test new guest");
-    }
-
-    @Override
-    public void cashIncome(Integer summ) throws PrinterException {
-        showMessage("cash income");
-    }
-
-    @Override
-    public void startShift() throws PrinterException {
-        showMessage("start shift");
     }
 
 }
