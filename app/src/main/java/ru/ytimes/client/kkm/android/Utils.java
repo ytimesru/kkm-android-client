@@ -1,18 +1,40 @@
 package ru.ytimes.client.kkm.android;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by andrey on 26.05.18.
  */
 
 public class Utils {
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+    public static String toDateString(Date date) {
+        if (date == null) {
+            return null;
+        }
+        Calendar instance = Calendar.getInstance();
+        instance.setTime(date);
+        return dateFormat.format(date.getTime());
+    }
+
+    public static Set<BluetoothDevice> getBluetoothDevices() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return mBluetoothAdapter.getBondedDevices();
+    }
 
     /**
      * Convert byte array to hex string

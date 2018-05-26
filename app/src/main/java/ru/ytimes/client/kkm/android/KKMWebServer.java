@@ -17,8 +17,10 @@ import java.util.Map;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import fi.iki.elonen.NanoHTTPD;
+import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 import ru.ytimes.client.kkm.android.printer.Printer;
 import ru.ytimes.client.kkm.android.printer.PrinterException;
+import ru.ytimes.client.kkm.android.printer.TestPrinter;
 import ru.ytimes.client.kkm.android.record.ActionRecord;
 import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
 import ru.ytimes.client.kkm.android.record.ConfigRecord;
@@ -233,7 +235,7 @@ public class KKMWebServer extends NanoHTTPD {
         return record;
     }
 
-    private void applyConfig(ConfigRecord record) {
+    private void applyConfig(ConfigRecord record) throws PrinterException {
         try {
             SharedPreferences preferences = context.getSharedPreferences("kkm", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = preferences.edit();
@@ -269,8 +271,41 @@ public class KKMWebServer extends NanoHTTPD {
         return mapper.readValue(message, tClass);
     }
 
-    public void initPrinter() {
-        showMessage("Init printer");
+    synchronized public void initPrinter() throws PrinterException {
+        ConfigRecord config = getConfig();
+        if (config.model == null || config.model.isEmpty()) {
+            showMessage("Фискальный регистратор не подключен");
+            return;
+        }
+        showMessage("Подключаем фискальный регистратор");
+        if (printer != null) {
+            try {
+                printer.stop();
+            }
+            catch (Throwable e) {}
+        }
+
+
+        if ("TEST".equals(config.model)) {
+            printer = new TestPrinter(context);
+        }
+        else if (config.model.startsWith("ATOL")) {
+            AtolPrinter atolPrinter = new AtolPrinter(context);
+            atolPrinter.setModel(config.model);
+            atolPrinter.setPort(config.port);
+            atolPrinter.setWifiIP(config.wifiIP);
+            atolPrinter.setWifiPort(config.wifiPort);
+            atolPrinter.setVat(config.vat != null ? config.vat : VAT.NO);
+            atolPrinter.setOfdChannel(config.ofd != null ? config.ofd : OFDChannel.PROTO);
+
+            printer = atolPrinter;
+            try {
+                printer.connect(context);
+            }
+            catch (Exception e) {
+                throw new PrinterException(0, e.getMessage());
+            }
+        }
     }
 
 }

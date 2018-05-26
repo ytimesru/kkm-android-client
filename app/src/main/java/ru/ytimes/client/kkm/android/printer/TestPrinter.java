@@ -22,6 +22,7 @@ public class TestPrinter implements Printer {
 
     public TestPrinter(Context context) {
         this.context = context;
+        showMessage("Тестовый принтер");
     }
 
     public void showMessage(String message) {

@@ -2,6 +2,8 @@ package ru.ytimes.client.kkm.android.printer;
 
 import android.content.Context;
 
+import java.util.concurrent.ExecutionException;
+
 import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
 import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
 import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
@@ -15,7 +17,7 @@ import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 
 public interface Printer {
 
-    void connect(Context application);
+    void connect(Context application) throws ExecutionException, InterruptedException;
 
     boolean isConnected() throws PrinterException;
 
