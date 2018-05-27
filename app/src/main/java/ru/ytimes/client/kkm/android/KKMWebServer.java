@@ -278,12 +278,7 @@ public class KKMWebServer extends NanoHTTPD {
             return;
         }
         showMessage("Подключаем фискальный регистратор");
-        if (printer != null) {
-            try {
-                printer.stop();
-            }
-            catch (Throwable e) {}
-        }
+        stopPrinter();
 
 
         if ("TEST".equals(config.model)) {
@@ -305,6 +300,21 @@ public class KKMWebServer extends NanoHTTPD {
             catch (Exception e) {
                 throw new PrinterException(0, e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public void stop() {
+        stopPrinter();
+        super.stop();
+    }
+
+    private void stopPrinter() {
+        if (printer != null) {
+            try {
+                printer.stop();
+            }
+            catch (Throwable e) {}
         }
     }
 

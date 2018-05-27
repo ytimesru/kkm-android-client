@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onConnectButtonClick(View view) {
-
         stopService(serviceIntent);
     }
 

@@ -22,7 +22,6 @@ import ru.ytimes.client.kkm.android.record.GuestRecord;
 import ru.ytimes.client.kkm.android.record.GuestType;
 import ru.ytimes.client.kkm.android.record.ItemRecord;
 import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
-import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.OFDChannel;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
@@ -91,90 +90,79 @@ public class AtolPrinter implements Printer {
 
     public void stop() {
         if (fptr != null) {
+            fptr.close();
             fptr.destroy();
         }
     }
 
     synchronized public boolean isConnected() throws PrinterException {
-        doConnect();
-        try {
-            return true;
-        }
-        finally {
-            doDisconnect();
-        }
+        return fptr.isOpened();
     }
 
     synchronized public ModelInfoRecord getInfo() throws PrinterException {
-        doConnect();
-        try {
-            fptr.setParam(IFptr.LIBFPTR_PARAM_DATA_TYPE, IFptr.LIBFPTR_DT_STATUS);
-            if (fptr.queryData() < 0) {
-                checkError(fptr);
-            }
-
-            ModelInfoRecord record = new ModelInfoRecord();
-            record.serialNumber    = fptr.getParamString(IFptr.LIBFPTR_PARAM_SERIAL_NUMBER);
-            record.modelName       = fptr.getParamString(IFptr.LIBFPTR_PARAM_MODEL_NAME);
-            record.unitVersion     = fptr.getParamString(IFptr.LIBFPTR_PARAM_UNIT_VERSION);
-
-            //ОФД
-            fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_REG_INFO);
-            if (fptr.fnQueryData() < 0) {
-                checkError(fptr);
-            }
-
-            record.ofdName = fptr.getParamString(1046);
-
-
-            fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_OFD_EXCHANGE_STATUS);
-            if (fptr.fnQueryData() < 0) {
-                checkError(fptr);
-            }
-
-            record.ofdUnsentCount    = fptr.getParamInt(IFptr.LIBFPTR_PARAM_DOCUMENTS_COUNT);
-            Date unsentDateTime = fptr.getParamDateTime(IFptr.LIBFPTR_PARAM_DATE_TIME);
-            if (unsentDateTime != null) {
-                record.ofdUnsentDatetime = Utils.toDateString(unsentDateTime);
-            }
-
-
-            //ФФД
-            fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_FFD_VERSIONS);
-            if (fptr.fnQueryData() < 0) {
-                checkError(fptr);
-            }
-
-            long deviceFfdVersion    = fptr.getParamInt(IFptr.LIBFPTR_PARAM_DEVICE_FFD_VERSION);
-            record.deviceFfdVersion  = getFFDVersion(deviceFfdVersion);
-            long fnFfdVersion        = fptr.getParamInt(IFptr.LIBFPTR_PARAM_FN_FFD_VERSION);
-            record.fnFfdVersion      = getFFDVersion(fnFfdVersion);
-            long ffdVersion          = fptr.getParamInt(IFptr.LIBFPTR_PARAM_FFD_VERSION);
-            record.ffdVersion        = getFFDVersion(ffdVersion);
-
-            //ФН
-            fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_FN_INFO);
-            fptr.fnQueryData();
-
-            record.fnSerial = fptr.getParamString(IFptr.LIBFPTR_PARAM_SERIAL_NUMBER);
-            record.fnVersion = fptr.getParamString(IFptr.LIBFPTR_PARAM_FN_VERSION);
-
-            //ФН Дата окончания
-            fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_VALIDITY);
-            if (fptr.fnQueryData() < 0) {
-                checkError(fptr);
-            }
-
-            Date dateTime = fptr.getParamDateTime(IFptr.LIBFPTR_PARAM_DATE_TIME);
-            if (dateTime != null) {
-                record.fnDate = Utils.toDateString(dateTime);
-            }
-
-            return record;
+        fptr.setParam(IFptr.LIBFPTR_PARAM_DATA_TYPE, IFptr.LIBFPTR_DT_STATUS);
+        if (fptr.queryData() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+
+        ModelInfoRecord record = new ModelInfoRecord();
+        record.serialNumber    = fptr.getParamString(IFptr.LIBFPTR_PARAM_SERIAL_NUMBER);
+        record.modelName       = fptr.getParamString(IFptr.LIBFPTR_PARAM_MODEL_NAME);
+        record.unitVersion     = fptr.getParamString(IFptr.LIBFPTR_PARAM_UNIT_VERSION);
+
+        //ОФД
+        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_REG_INFO);
+        if (fptr.fnQueryData() < 0) {
+            checkError(fptr);
         }
+
+        record.ofdName = fptr.getParamString(1046);
+
+
+        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_OFD_EXCHANGE_STATUS);
+        if (fptr.fnQueryData() < 0) {
+            checkError(fptr);
+        }
+
+        record.ofdUnsentCount    = fptr.getParamInt(IFptr.LIBFPTR_PARAM_DOCUMENTS_COUNT);
+        Date unsentDateTime = fptr.getParamDateTime(IFptr.LIBFPTR_PARAM_DATE_TIME);
+        if (unsentDateTime != null) {
+            record.ofdUnsentDatetime = Utils.toDateString(unsentDateTime);
+        }
+
+
+        //ФФД
+        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_FFD_VERSIONS);
+        if (fptr.fnQueryData() < 0) {
+            checkError(fptr);
+        }
+
+        long deviceFfdVersion    = fptr.getParamInt(IFptr.LIBFPTR_PARAM_DEVICE_FFD_VERSION);
+        record.deviceFfdVersion  = getFFDVersion(deviceFfdVersion);
+        long fnFfdVersion        = fptr.getParamInt(IFptr.LIBFPTR_PARAM_FN_FFD_VERSION);
+        record.fnFfdVersion      = getFFDVersion(fnFfdVersion);
+        long ffdVersion          = fptr.getParamInt(IFptr.LIBFPTR_PARAM_FFD_VERSION);
+        record.ffdVersion        = getFFDVersion(ffdVersion);
+
+        //ФН
+        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_FN_INFO);
+        fptr.fnQueryData();
+
+        record.fnSerial = fptr.getParamString(IFptr.LIBFPTR_PARAM_SERIAL_NUMBER);
+        record.fnVersion = fptr.getParamString(IFptr.LIBFPTR_PARAM_FN_VERSION);
+
+        //ФН Дата окончания
+        fptr.setParam(IFptr.LIBFPTR_PARAM_FN_DATA_TYPE, IFptr.LIBFPTR_FNDT_VALIDITY);
+        if (fptr.fnQueryData() < 0) {
+            checkError(fptr);
+        }
+
+        Date dateTime = fptr.getParamDateTime(IFptr.LIBFPTR_PARAM_DATE_TIME);
+        if (dateTime != null) {
+            record.fnDate = Utils.toDateString(dateTime);
+        }
+
+        return record;
     }
 
     private String getFFDVersion(long version) {
@@ -197,6 +185,7 @@ public class AtolPrinter implements Printer {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
+                    publishProgress("PPP: 1");
                     if (fptr != null) {
                         try {
                             stop();
@@ -205,6 +194,7 @@ public class AtolPrinter implements Printer {
                             publishProgress(e.getMessage());
                         }
                     }
+
 
                     if (port == null || port.isEmpty()) {
                         throw new PrinterException(0, "Порт подключения не задан");
@@ -251,11 +241,11 @@ public class AtolPrinter implements Printer {
                         if (ofdChannel.equals(OFDChannel.PROTO)) {
                             publishProgress("ОФД средвами транспортного протокола (OFD PROTO 1)");
                             fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_OFD_CHANNEL, String.valueOf(IFptr.LIBFPTR_OFD_CHANNEL_PROTO));
-                        } else if (ofdChannel.equals(OFDChannel.ASIS)) {
-                            publishProgress("ОФД используя настройки ККМ (OFD NONE 2)");
-                            fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_OFD_CHANNEL, String.valueOf(IFptr.LIBFPTR_OFD_CHANNEL_NONE));
                         } else {
-                            throw new PrinterException(0, "Не поддерживаемое значение параметра связи с ОФД");
+                            if (ofdChannel.equals(OFDChannel.ASIS)) {
+                                publishProgress("ОФД используя настройки ККМ (OFD NONE 2)");
+                            }
+                            fptr.setSingleSetting(IFptr.LIBFPTR_SETTING_OFD_CHANNEL, String.valueOf(IFptr.LIBFPTR_OFD_CHANNEL_NONE));
                         }
                     }
 
@@ -264,12 +254,46 @@ public class AtolPrinter implements Printer {
                     }
 
                     publishProgress("Проверка связи");
-                    doConnect();
-                    try {
-                        cancelCheck();
-                        publishProgress("Подключено");
-                    } finally {
-                        doDisconnect();
+                    if (fptr.open() < 0) {
+                        checkError(fptr);
+                    }
+                    cancelCheck();
+                    publishProgress("Подключено");
+
+                    if (!ofdChannel.equals(OFDChannel.PROTO) && !ofdChannel.equals(OFDChannel.ASIS)) {
+                        if (ofdChannel.equals(OFDChannel.USB)) {
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 1);
+                            fptr.writeDeviceSetting();
+                            publishProgress("ОФД через USB (установить EoU модуль)");
+                        }
+                        if (ofdChannel.equals(OFDChannel.ETHERNET)) {
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 2);
+                            fptr.writeDeviceSetting();
+                            publishProgress("ОФД через Ethernet");
+                        }
+                        else if (ofdChannel.equals(OFDChannel.WIFI)) {
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 3);
+                            fptr.writeDeviceSetting();
+                            publishProgress("ОФД через WiFi");
+                        }
+                        else if (ofdChannel.equals(OFDChannel.GSM)) {
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 4);
+                            fptr.writeDeviceSetting();
+                            publishProgress("ОФД через GSM");
+                        }
+                        else if (ofdChannel.equals(OFDChannel.TRANSPORT)) {
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 5);
+                            fptr.writeDeviceSetting();
+                            publishProgress("ОФД через транспортный протокол");
+                        }
+                        else {
+                            throw new PrinterException(0, "Не поддерживаемое значение параметра связи с ОФД: " + ofdChannel.name());
+                        }
                     }
 
                 }
@@ -299,152 +323,90 @@ public class AtolPrinter implements Printer {
         context.sendBroadcast(local);
     }
 
-    private void doConnect() throws PrinterException {
-        //showMessage("Связь установлена");
-        if (fptr.open() < 0) {
-            checkError(fptr);
-        }
-    }
-
-    private void doDisconnect() throws PrinterException {
-        //showMessage("Отключились от устройства");
-        if (fptr.close() < 0) {
-            checkError(fptr);
-        }
-    }
-
     public void destroy() throws Throwable {
         stop();
     }
 
     synchronized public void reportX(ReportCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_X);
-            if (fptr.report() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_X);
+        if (fptr.report() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
     synchronized public void reportZ(AbstractCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_CLOSE_SHIFT);
-            if (fptr.report() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_CLOSE_SHIFT);
+        if (fptr.report() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
     synchronized public void startShift(ReportCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            if (fptr.openShift() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        if (fptr.openShift() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
     synchronized public void cashIncome(CashIncomeRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_SUM, record.sum);
-            if (fptr.cashIncome() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        fptr.setParam(IFptr.LIBFPTR_PARAM_SUM, record.sum);
+        if (fptr.cashIncome() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
 
     synchronized public void copyLastDoc(AbstractCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_LAST_DOCUMENT);
-            if (fptr.report() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_LAST_DOCUMENT);
+        if (fptr.report() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
     synchronized public void demoReport(AbstractCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_KKT_DEMO);
-            if (fptr.report() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_KKT_DEMO);
+        if (fptr.report() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
     synchronized public void ofdTestReport(AbstractCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            loginOperator(record);
-            fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_OFD_TEST);
-            if (fptr.report() < 0) {
-                checkError(fptr);
-            }
-            if (!waitDocumentClosed()) {
-                checkError(fptr);
-            }
+        loginOperator(record);
+        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_OFD_TEST);
+        if (fptr.report() < 0) {
+            checkError(fptr);
         }
-        finally {
-            doDisconnect();
+        if (!waitDocumentClosed()) {
+            checkError(fptr);
         }
     }
 
     //выставление счета
     synchronized public void printPredCheck(PrintCheckCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            doPrintPredCheck(record);
-        }
-        finally {
-            doDisconnect();
-        }
+        doPrintPredCheck(record);
     }
 
     private void doPrintPredCheck(PrintCheckCommandRecord record) throws PrinterException {
@@ -520,23 +482,11 @@ public class AtolPrinter implements Printer {
     }
 
     synchronized public void printCheck(PrintCheckCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            doPrintCheck(record, IFptr.LIBFPTR_RT_SELL);
-        }
-        finally {
-            doDisconnect();
-        }
+        doPrintCheck(record, IFptr.LIBFPTR_RT_SELL);
     }
 
     synchronized public void printReturnCheck(PrintCheckCommandRecord record) throws PrinterException {
-        doConnect();
-        try {
-            doPrintCheck(record, IFptr.LIBFPTR_RT_SELL_RETURN);
-        }
-        finally {
-            doDisconnect();
-        }
+        doPrintCheck(record, IFptr.LIBFPTR_RT_SELL_RETURN);
     }
 
     private void doPrintCheck(PrintCheckCommandRecord record, int checkType) throws PrinterException {

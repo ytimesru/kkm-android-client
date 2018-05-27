@@ -34,7 +34,6 @@ import ru.ytimes.client.kkm.android.printer.TestPrinter;
 public class MainService extends Service {
     private static final String TAG = "YTIMES";
     private KKMWebServer kkmWebServer;
-    private Printer printer;
 
     @Nullable
     @Override
@@ -83,13 +82,6 @@ public class MainService extends Service {
             }
         }
         catch (Exception e) {
-        }
-        if (printer != null) {
-            try {
-                printer.stop();
-            }
-            catch (Exception e) {
-            }
         }
     }
 

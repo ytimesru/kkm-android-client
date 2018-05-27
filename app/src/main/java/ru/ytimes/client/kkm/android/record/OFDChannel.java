@@ -4,9 +4,11 @@ public enum OFDChannel {
 
     PROTO,
     ASIS,
+
     USB,
     ETHERNET,
     WIFI,
-    GSM
+    GSM,
+    TRANSPORT
 
 }
