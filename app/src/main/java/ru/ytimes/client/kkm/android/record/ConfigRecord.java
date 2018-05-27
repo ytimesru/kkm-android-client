@@ -11,12 +11,12 @@ import java.util.Map;
 public class ConfigRecord {
 
     public String verificationCode;
-    public String model;
-    public String port;
+    public String model = "ATOLAUTO";
+    public String port = "BLUETOOTH";
     public String wifiIP;
-    public Integer wifiPort;
-    public VAT vat;
-    public OFDChannel ofd;
+    public Integer wifiPort = 5555;
+    public VAT vat = VAT.NO;
+    public OFDChannel ofd = OFDChannel.PROTO;
     public Map<String, String> params;
 
 

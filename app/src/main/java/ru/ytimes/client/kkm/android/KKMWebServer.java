@@ -189,10 +189,7 @@ public class KKMWebServer extends NanoHTTPD {
     private ConfigRecord getConfig() {
         ConfigRecord record = new ConfigRecord();
         record.params = new HashMap<String, String>();
-        record.model = "NONE";
         record.verificationCode = this.verificationCode;
-        record.vat = VAT.NO;
-        record.ofd = OFDChannel.PROTO;
 
         SharedPreferences preferences = context.getSharedPreferences("kkm", Context.MODE_PRIVATE);
         Map<String, ?> preferencesAll = preferences.getAll();
