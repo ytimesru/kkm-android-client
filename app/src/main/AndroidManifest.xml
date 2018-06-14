@@ -27,13 +27,13 @@
         </activity>
 
         <service
-            android:name="ru.ytimes.client.kkm.android.ru.ytimes.client.main.MainService"
+            android:name="ru.ytimes.client.main.MainService"
             android:enabled="true" >
         </service>
 
 
         <receiver
-            android:name="ru.ytimes.client.kkm.android.ru.ytimes.client.main.ServiceRestartBroadcastReceiver"
+            android:name="ru.ytimes.client.main.ServiceRestartBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             android:label="RestartServiceWhenStopped">
@@ -42,7 +42,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="ru.ytimes.client.kkm.android.ru.ytimes.client.main.BootBroadcastReceiver">
+        <receiver android:name="ru.ytimes.client.main.BootBroadcastReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />

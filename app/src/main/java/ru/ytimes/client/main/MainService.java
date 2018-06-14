@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
+
 import java.io.InputStream;
 import java.security.KeyStore;
 
@@ -27,6 +29,7 @@ import fi.iki.elonen.NanoHTTPD;
 public class MainService extends Service {
     private static final String TAG = "YTIMES";
     private WebServer webServer;
+    private WSServer wsServer;
 
     @Nullable
     @Override
@@ -73,6 +76,9 @@ public class MainService extends Service {
             if (webServer != null) {
                 webServer.stop();
             }
+            if (wsServer != null) {
+                wsServer.stop();
+            }
         }
         catch (Exception e) {
         }
@@ -88,11 +94,18 @@ public class MainService extends Service {
             webServer = new WebServer(port, context.getServerSocketFactory(), getApplication());
             webServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
             showMessage("Веб сервер успешно запущен на порту: " + port);
+
+            wsServer = new WSServer(getApplication(), 4910);
+            wsServer.setWebSocketFactory(new DefaultSSLWebSocketServerFactory(context));
+            wsServer.start();
+            webServer.setScreenWsServer(wsServer);
+
             try {
                 String ipAddress = Utils.getIPAddress(true);
                 showMessage("IP адрес: " + ipAddress);
             }
-            catch (Exception e) {}
+            catch (Exception e) {
+            }
             webServer.initPrinter();
         }
         catch (Exception e) {
@@ -100,6 +113,8 @@ public class MainService extends Service {
             showMessage("Ошибка запуска сервера: " + e.getMessage());
             return false;
         }
+
+
         return true;
     }
 

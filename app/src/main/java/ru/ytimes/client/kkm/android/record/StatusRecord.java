@@ -1,5 +1,8 @@
 package ru.ytimes.client.kkm.android.record;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class StatusRecord {
 
     public String version;

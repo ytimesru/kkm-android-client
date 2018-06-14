@@ -31,6 +31,7 @@ import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 import ru.ytimes.client.kkm.android.record.Result;
 import ru.ytimes.client.kkm.android.record.StatusRecord;
 import ru.ytimes.client.kkm.android.record.VAT;
+import ru.ytimes.client.records.ScreenInfoRecord;
 
 /**
  * Created by andrey on 26.09.17.
@@ -38,17 +39,22 @@ import ru.ytimes.client.kkm.android.record.VAT;
 
 public class WebServer extends NanoHTTPD {
     private static final String TAG = "YTIMES";
-    private static String version = "2.0.2.android";
+    private static String version = "2.0.3.android";
 
     private Printer printer;
     private Context context;
     private String verificationCode = "87fays87f";
     private ObjectMapper mapper = new ObjectMapper();
+    private WSServer screenWsServer;
 
     public WebServer(int port, SSLServerSocketFactory sslFactory, Context context) throws Exception {
         super(port);
         makeSecure(sslFactory, null);
         this.context = context;
+    }
+
+    public void setScreenWsServer(WSServer screenWsServer) {
+        this.screenWsServer = screenWsServer;
     }
 
     public void showMessage(String message) {
@@ -135,6 +141,15 @@ public class WebServer extends NanoHTTPD {
                 }
             }
             return record;
+        }
+        else if (action.action.startsWith("screen")) {
+            if ("screen/clear".equals(action.action)) {
+                screenWsServer.setInfo(null);
+            }
+            else if ("screen/set".equals(action.action)) {
+                ScreenInfoRecord record = parseMessage(action.data, ScreenInfoRecord.class);
+                screenWsServer.setInfo(record);
+            }
         }
         else {
             if (printer == null) {
