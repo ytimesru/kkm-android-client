@@ -1,4 +1,4 @@
-package ru.ytimes.client.kkm.android;
+package ru.ytimes.client.main;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

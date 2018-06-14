@@ -1,16 +1,13 @@
-package ru.ytimes.client.kkm.android;
+package ru.ytimes.client.main;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
-import org.java_websocket.server.DefaultSSLWebSocketServerFactory;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -18,14 +15,10 @@ import java.security.KeyStore;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import fi.iki.elonen.NanoHTTPD;
-import ru.ytimes.client.kkm.android.printer.AtolPrinter;
-import ru.ytimes.client.kkm.android.printer.Printer;
-import ru.ytimes.client.kkm.android.printer.TestPrinter;
 
 /**
  * Created by andrey on 18.06.17.
@@ -33,7 +26,7 @@ import ru.ytimes.client.kkm.android.printer.TestPrinter;
 
 public class MainService extends Service {
     private static final String TAG = "YTIMES";
-    private KKMWebServer kkmWebServer;
+    private WebServer webServer;
 
     @Nullable
     @Override
@@ -77,8 +70,8 @@ public class MainService extends Service {
 
     public void stop() {
         try {
-            if (kkmWebServer != null) {
-                kkmWebServer.stop();
+            if (webServer != null) {
+                webServer.stop();
             }
         }
         catch (Exception e) {
@@ -92,15 +85,15 @@ public class MainService extends Service {
         try {
             SSLContext context = getSSLContext();
             int port = 4900;
-            kkmWebServer = new KKMWebServer(port, context.getServerSocketFactory(), getApplication());
-            kkmWebServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+            webServer = new WebServer(port, context.getServerSocketFactory(), getApplication());
+            webServer.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
             showMessage("Веб сервер успешно запущен на порту: " + port);
             try {
                 String ipAddress = Utils.getIPAddress(true);
                 showMessage("IP адрес: " + ipAddress);
             }
             catch (Exception e) {}
-            kkmWebServer.initPrinter();
+            webServer.initPrinter();
         }
         catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);

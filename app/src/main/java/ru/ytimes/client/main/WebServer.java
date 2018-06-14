@@ -1,4 +1,4 @@
-package ru.ytimes.client.kkm.android;
+package ru.ytimes.client.main;
 
 import android.app.Application;
 import android.content.Context;
@@ -36,7 +36,7 @@ import ru.ytimes.client.kkm.android.record.VAT;
  * Created by andrey on 26.09.17.
  */
 
-public class KKMWebServer extends NanoHTTPD {
+public class WebServer extends NanoHTTPD {
     private static final String TAG = "YTIMES";
     private static String version = "2.0.2.android";
 
@@ -45,7 +45,7 @@ public class KKMWebServer extends NanoHTTPD {
     private String verificationCode = "87fays87f";
     private ObjectMapper mapper = new ObjectMapper();
 
-    public KKMWebServer(int port, SSLServerSocketFactory sslFactory, Context context) throws Exception {
+    public WebServer(int port, SSLServerSocketFactory sslFactory, Context context) throws Exception {
         super(port);
         makeSecure(sslFactory, null);
         this.context = context;

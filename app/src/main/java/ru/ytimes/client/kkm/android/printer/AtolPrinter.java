@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 import ru.atol.drivers10.fptr.Fptr;
 import ru.atol.drivers10.fptr.IFptr;
-import ru.ytimes.client.kkm.android.Utils;
+import ru.ytimes.client.main.Utils;
 import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
 import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
 import ru.ytimes.client.kkm.android.record.GuestRecord;

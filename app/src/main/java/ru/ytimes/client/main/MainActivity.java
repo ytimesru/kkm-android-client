@@ -1,4 +1,4 @@
-package ru.ytimes.client.kkm.android;
+package ru.ytimes.client.main;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import ru.ytimes.client.kkm.android.R;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "YTIMES";
