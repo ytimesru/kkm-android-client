@@ -13,6 +13,7 @@ import java.io.IOError;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.SSLServerSocketFactory;
 
@@ -37,7 +38,7 @@ import ru.ytimes.client.kkm.android.record.VAT;
 
 public class KKMWebServer extends NanoHTTPD {
     private static final String TAG = "YTIMES";
-    private static String version = "2.0.1.android";
+    private static String version = "2.0.2.android";
 
     private Printer printer;
     private Context context;
@@ -103,7 +104,7 @@ public class KKMWebServer extends NanoHTTPD {
         return resp;
     }
 
-    private Object processAction(String json) throws PrinterException, IOException {
+    private Object processAction(String json) throws PrinterException, IOException, InterruptedException, ExecutionException {
         ActionRecord action = parseMessage(json, ActionRecord.class);
         if (action == null) {
             throw new IllegalArgumentException("error parse ActionRecord");
@@ -140,6 +141,10 @@ public class KKMWebServer extends NanoHTTPD {
                 throw new IllegalArgumentException("Не настроен принтер чеков. Проверьте настройки системы в разделе Оборудование");
             }
             else {
+                if (!printer.isConnected()) {
+                    initPrinter();
+                }
+
                 if ("printCheck".equals(action.action)) {
                     PrintCheckCommandRecord record = parseMessage(action.data, PrintCheckCommandRecord.class);
                     printer.printCheck(record);

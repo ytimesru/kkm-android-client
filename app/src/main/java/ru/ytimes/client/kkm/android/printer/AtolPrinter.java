@@ -185,7 +185,6 @@ public class AtolPrinter implements Printer {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
-                    publishProgress("PPP: 1");
                     if (fptr != null) {
                         try {
                             stop();
@@ -258,9 +257,9 @@ public class AtolPrinter implements Printer {
                         checkError(fptr);
                     }
                     cancelCheck();
-                    publishProgress("Подключено");
+                    publishProgress("ПОДКЛЮЧЕНО");
 
-                    if (!ofdChannel.equals(OFDChannel.PROTO) && !ofdChannel.equals(OFDChannel.ASIS)) {
+                    if (!ofdChannel.equals(OFDChannel.ASIS)) {
                         if (ofdChannel.equals(OFDChannel.USB)) {
                             fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
                             fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 1);
@@ -290,6 +289,12 @@ public class AtolPrinter implements Printer {
                             fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 5);
                             fptr.writeDeviceSetting();
                             publishProgress("ОФД через транспортный протокол");
+                        }
+                        else if (ofdChannel.equals(OFDChannel.PROTO)) {
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_ID, 276);
+                            fptr.setParam(IFptr.LIBFPTR_PARAM_SETTING_VALUE, 5);
+                            fptr.writeDeviceSetting();
+                            //publishProgress("ОФД через транспортный протокол");
                         }
                         else {
                             throw new PrinterException(0, "Не поддерживаемое значение параметра связи с ОФД: " + ofdChannel.name());
