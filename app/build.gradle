@@ -43,4 +43,5 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.8.8'
     testCompile 'junit:junit:4.12'
     compile(name: 'libfptr10', ext: 'aar')
+    compile(name: 'Sam4sAndroidSDK', ext: 'jar')
 }

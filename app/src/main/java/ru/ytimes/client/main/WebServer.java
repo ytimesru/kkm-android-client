@@ -18,7 +18,10 @@ import java.util.concurrent.ExecutionException;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import fi.iki.elonen.NanoHTTPD;
+import ru.ytimes.client.kitchen.KitchenPrinter;
+import ru.ytimes.client.kitchen.Sam4sKitchenPrinter;
 import ru.ytimes.client.kkm.android.printer.AtolPrinter;
+import ru.ytimes.client.kkm.android.printer.POSPrinter;
 import ru.ytimes.client.kkm.android.printer.Printer;
 import ru.ytimes.client.kkm.android.printer.PrinterException;
 import ru.ytimes.client.kkm.android.printer.TestPrinter;
@@ -32,6 +35,7 @@ import ru.ytimes.client.kkm.android.record.Result;
 import ru.ytimes.client.kkm.android.record.StatusRecord;
 import ru.ytimes.client.kkm.android.record.VAT;
 import ru.ytimes.client.records.ScreenInfoRecord;
+import ru.ytimes.client.utils.StringUtils;
 
 /**
  * Created by andrey on 26.09.17.
@@ -42,6 +46,7 @@ public class WebServer extends NanoHTTPD {
     private static String version = "2.0.3.android";
 
     private Printer printer;
+    private KitchenPrinter kitchenPrinter = null;
     private Context context;
     private String verificationCode = "87fays87f";
     private ObjectMapper mapper = new ObjectMapper();
@@ -151,13 +156,19 @@ public class WebServer extends NanoHTTPD {
                 screenWsServer.setInfo(record);
             }
         }
+        else if (action.action.startsWith("kitchen")) {
+            if (kitchenPrinter != null && "kitchen/print".equals(action.action)) {
+                PrintCheckCommandRecord record = parseMessage(action.data, PrintCheckCommandRecord.class);
+                kitchenPrinter.print(record);
+            }
+        }
         else {
             if (printer == null) {
                 throw new IllegalArgumentException("Не настроен принтер чеков. Проверьте настройки системы в разделе Оборудование");
             }
             else {
                 if (!printer.isConnected()) {
-                    initPrinter();
+                    initPrinter(false);
                 }
 
                 if ("printCheck".equals(action.action)) {
@@ -244,6 +255,24 @@ public class WebServer extends NanoHTTPD {
             else if (keys.equals("ofd")) {
                 record.ofd = value != null ? OFDChannel.valueOf(value) : OFDChannel.PROTO;
             }
+            else if (keys.equals("kitchenPrinterModel")) {
+                record.kitchenPrinterModel = value;
+            }
+            else if (keys.equals("kitchenPrinterIP")) {
+                record.kitchenPrinterIP = value;
+            }
+            else if (keys.equals("kitchenPrinterPort")) {
+                try {
+                    record.kitchenPrinterPort = Integer.parseInt(value);
+                }
+                catch (NumberFormatException e) {}
+            }
+            else if (keys.equals("kitchenPrinterNumber")) {
+                try {
+                    record.kitchenPrinterNumber = Integer.parseInt(value);
+                }
+                catch (NumberFormatException e) {}
+            }
             else {
                 record.params.put(keys, value);
             }
@@ -265,6 +294,10 @@ public class WebServer extends NanoHTTPD {
             editor.putString("wifiPort", record.wifiPort != null ? record.wifiPort + "" : null);
             editor.putString("vat", record.vat != null ? record.vat.name() : VAT.NO.name());
             editor.putString("ofd", record.ofd != null ? record.ofd.name() : OFDChannel.PROTO.name());
+            editor.putString("kitchenPrinterModel", record.kitchenPrinterModel);
+            editor.putString("kitchenPrinterIP", record.kitchenPrinterIP);
+            editor.putString("kitchenPrinterPort", record.kitchenPrinterPort != null ? record.kitchenPrinterPort + "" : null);
+            editor.putString("kitchenPrinterNumber", record.kitchenPrinterNumber != null ? record.kitchenPrinterNumber + "" : null);
             if (record.params != null && record.params.size() > 0) {
                 for (String keys : record.params.keySet()) {
                     editor.putString(keys, record.params.get(keys));
@@ -274,7 +307,7 @@ public class WebServer extends NanoHTTPD {
             editor.commit();
         }
         finally {
-            initPrinter();
+            initPrinter(true);
         }
     }
 
@@ -288,7 +321,7 @@ public class WebServer extends NanoHTTPD {
         return mapper.readValue(message, tClass);
     }
 
-    synchronized public void initPrinter() throws PrinterException {
+    synchronized public void initPrinter(boolean demoOnConnect) throws PrinterException {
         ConfigRecord config = getConfig();
         if (config.model == null || config.model.isEmpty()) {
             showMessage("Фискальный регистратор не подключен");
@@ -316,6 +349,28 @@ public class WebServer extends NanoHTTPD {
             }
             catch (Exception e) {
                 throw new PrinterException(0, e.getMessage());
+            }
+        }
+        else if (config.model.startsWith("POSPRINTER")) {
+            if (StringUtils.isEmpty(config.wifiIP) || config.wifiPort == null) {
+                throw new PrinterException(0, "POS принтер поддерживает только Wifi подключение");
+            }
+            printer = new POSPrinter(config.wifiIP, config.wifiPort);
+            try {
+                printer.connect(context);
+                if (demoOnConnect) {
+                    printer.demoReport(null);
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                throw new PrinterException(0, e.getMessage());
+            }
+        }
+
+        if (config.kitchenPrinterModel != null) {
+            if (config.kitchenPrinterModel.equals("POS")) {
+                kitchenPrinter = new Sam4sKitchenPrinter(config.kitchenPrinterIP, config.kitchenPrinterPort, config.kitchenPrinterNumber);
             }
         }
     }

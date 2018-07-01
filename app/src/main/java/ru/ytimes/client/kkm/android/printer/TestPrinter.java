@@ -50,7 +50,7 @@ public class TestPrinter implements Printer {
 
     @Override
     public ModelInfoRecord getInfo() throws PrinterException {
-        return new ModelInfoRecord();
+        return null;
     }
 
     @Override

@@ -18,4 +18,5 @@ public class ItemRecord {
 
     public VAT vatValue;
 
+    public Integer kitchenNum;
 }

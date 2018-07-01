@@ -11,6 +11,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class PrintCheckCommandRecord extends AbstractCommandRecord {
 
+    public String checkNum;
     public List<ItemRecord> itemList;
     public List<GuestRecord> guestInfoList;
     public GuestType type;

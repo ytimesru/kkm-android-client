@@ -388,14 +388,7 @@ public class AtolPrinter implements Printer {
     }
 
     synchronized public void demoReport(AbstractCommandRecord record) throws PrinterException {
-        loginOperator(record);
-        fptr.setParam(IFptr.LIBFPTR_PARAM_REPORT_TYPE, IFptr.LIBFPTR_RT_KKT_DEMO);
-        if (fptr.report() < 0) {
-            checkError(fptr);
-        }
-        if (!waitDocumentClosed()) {
-            checkError(fptr);
-        }
+
     }
 
     synchronized public void ofdTestReport(AbstractCommandRecord record) throws PrinterException {

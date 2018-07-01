@@ -21,6 +21,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import fi.iki.elonen.NanoHTTPD;
+import ru.ytimes.client.kitchen.KitchenPrinter;
+import ru.ytimes.client.kitchen.Sam4sKitchenPrinter;
 
 /**
  * Created by andrey on 18.06.17.
@@ -106,7 +108,7 @@ public class MainService extends Service {
             }
             catch (Exception e) {
             }
-            webServer.initPrinter();
+            webServer.initPrinter(false);
         }
         catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);

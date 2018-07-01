@@ -17,7 +17,7 @@ import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 
 public interface Printer {
 
-    void connect(Context application) throws ExecutionException, InterruptedException;
+    void connect(Context application) throws ExecutionException, InterruptedException, PrinterException;
 
     boolean isConnected() throws PrinterException;
 
