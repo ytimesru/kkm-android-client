@@ -40,7 +40,7 @@ import ru.ytimes.client.utils.StringUtils;
 
 public class WebServer extends NanoHTTPD {
     private static final String TAG = "YTIMES";
-    private static String version = "2.0.3.android";
+    private static String version = "2.0.6.android";
 
     private Printer printer;
     private KitchenPrinter kitchenPrinter = null;
