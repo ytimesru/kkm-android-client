@@ -5,9 +5,8 @@ import android.content.Intent;
 import android.util.Log;
 
 import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
-import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
+import ru.ytimes.client.kkm.android.record.CashChangeRecord;
 import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
-import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 
@@ -69,8 +68,13 @@ public class TestPrinter implements Printer {
     }
 
     @Override
-    public void cashIncome(CashIncomeRecord record) throws PrinterException {
+    public void cashIncome(CashChangeRecord record) throws PrinterException {
         showMessage("test: cash");
+    }
+
+    @Override
+    public void cashOutcome(CashChangeRecord record) throws PrinterException {
+        showMessage("test: outcome cash");
     }
 
     @Override

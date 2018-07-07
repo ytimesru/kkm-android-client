@@ -5,9 +5,8 @@ import android.content.Context;
 import java.util.concurrent.ExecutionException;
 
 import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
-import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
+import ru.ytimes.client.kkm.android.record.CashChangeRecord;
 import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
-import ru.ytimes.client.kkm.android.record.NewGuestCommandRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 
@@ -31,7 +30,9 @@ public interface Printer {
 
     void startShift(ReportCommandRecord record) throws PrinterException;
 
-    void cashIncome(CashIncomeRecord record) throws PrinterException;
+    void cashIncome(CashChangeRecord record) throws PrinterException;
+
+    void cashOutcome(CashChangeRecord record) throws PrinterException;
 
     void copyLastDoc(AbstractCommandRecord record) throws PrinterException;
 

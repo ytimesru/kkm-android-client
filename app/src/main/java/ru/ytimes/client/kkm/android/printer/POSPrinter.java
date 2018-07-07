@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
-import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
+import ru.ytimes.client.kkm.android.record.CashChangeRecord;
 import ru.ytimes.client.kkm.android.record.ItemRecord;
 import ru.ytimes.client.kkm.android.record.ModelInfoRecord;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
@@ -66,7 +66,12 @@ public class POSPrinter implements Printer {
     }
 
     @Override
-    public void cashIncome(CashIncomeRecord record) throws PrinterException {
+    public void cashIncome(CashChangeRecord record) throws PrinterException {
+        throw new IllegalStateException("Недоступно для данного принтера");
+    }
+
+    @Override
+    public void cashOutcome(CashChangeRecord record) throws PrinterException {
         throw new IllegalStateException("Недоступно для данного принтера");
     }
 

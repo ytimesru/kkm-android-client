@@ -1,6 +1,5 @@
 package ru.ytimes.client.main;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,8 +7,6 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOError;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +23,7 @@ import ru.ytimes.client.kkm.android.printer.Printer;
 import ru.ytimes.client.kkm.android.printer.PrinterException;
 import ru.ytimes.client.kkm.android.printer.TestPrinter;
 import ru.ytimes.client.kkm.android.record.ActionRecord;
-import ru.ytimes.client.kkm.android.record.CashIncomeRecord;
+import ru.ytimes.client.kkm.android.record.CashChangeRecord;
 import ru.ytimes.client.kkm.android.record.ConfigRecord;
 import ru.ytimes.client.kkm.android.record.OFDChannel;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
@@ -204,8 +201,12 @@ public class WebServer extends NanoHTTPD {
                     printer.startShift(record);
                 }
                 else if ("cashIncome".equals(action.action)) {
-                    CashIncomeRecord record = parseMessage(action.data, CashIncomeRecord.class);
+                    CashChangeRecord record = parseMessage(action.data, CashChangeRecord.class);
                     printer.cashIncome(record);
+                }
+                else if ("cashOutcome".equals(action.action)) {
+                    CashChangeRecord record = parseMessage(action.data, CashChangeRecord.class);
+                    printer.cashOutcome(record);
                 }
                 else {
                     throw new IllegalArgumentException("Неизвестная команда: " + action.action + ". Вероятно требуется обновить " +
