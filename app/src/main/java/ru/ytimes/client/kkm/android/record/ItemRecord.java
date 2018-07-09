@@ -11,6 +11,7 @@ public class ItemRecord {
     public String name;
     public Double price;
     public Double quantity;
+    public ItemType type;
 
     //задавать что-то одно из этого
     public Double discountSum;

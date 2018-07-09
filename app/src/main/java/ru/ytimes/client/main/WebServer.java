@@ -274,6 +274,12 @@ public class WebServer extends NanoHTTPD {
                 }
                 catch (NumberFormatException e) {}
             }
+            else if (keys.equals("accountExternalId")) {
+                record.accountExternalId = value;
+            }
+            else if (keys.equals("accountExternalBaseUrl")) {
+                record.accountExternalBaseUrl = value;
+            }
             else {
                 record.params.put(keys, value);
             }
@@ -299,6 +305,8 @@ public class WebServer extends NanoHTTPD {
             editor.putString("kitchenPrinterIP", record.kitchenPrinterIP);
             editor.putString("kitchenPrinterPort", record.kitchenPrinterPort != null ? record.kitchenPrinterPort + "" : null);
             editor.putString("kitchenPrinterNumber", record.kitchenPrinterNumber != null ? record.kitchenPrinterNumber + "" : null);
+            editor.putString("accountExternalId", record.accountExternalId);
+            editor.putString("accountExternalBaseUrl", record.accountExternalBaseUrl);
             if (record.params != null && record.params.size() > 0) {
                 for (String keys : record.params.keySet()) {
                     editor.putString(keys, record.params.get(keys));
@@ -391,4 +399,7 @@ public class WebServer extends NanoHTTPD {
         }
     }
 
+    public Printer getPrinter() {
+        return printer;
+    }
 }

@@ -28,6 +28,8 @@ public class PrintCheckCommandRecord extends AbstractCommandRecord {
     public String phone;
 
     public Boolean onlyElectronically = false;
+    public String billingLocation;
+    public String emailFrom;
     public Boolean dropPenny = false;
     public Boolean testMode;
 

@@ -19,9 +19,16 @@ public class ConfigRecord {
     public OFDChannel ofd = OFDChannel.PROTO;
     public Map<String, String> params;
 
+
+    //Kitchen
     public String kitchenPrinterModel = "NONE";
     public String kitchenPrinterIP = "192.168.0.253";
     public Integer kitchenPrinterPort = 6001;
     public Integer kitchenPrinterNumber = null;
+
+
+    //for remote print check
+    public String accountExternalId;
+    public String accountExternalBaseUrl;
 
 }

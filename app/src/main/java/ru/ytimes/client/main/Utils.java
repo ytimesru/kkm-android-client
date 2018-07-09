@@ -3,9 +3,14 @@ package ru.ytimes.client.main;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -21,8 +26,16 @@ import java.util.Set;
  */
 
 public class Utils {
+    protected static ObjectMapper mapper;
+    protected static ObjectWriter writer;
+
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
+    static {
+        mapper = new ObjectMapper();
+        writer = mapper.writer().withDefaultPrettyPrinter();
+    }
 
     public static String toDateString(Date date) {
         if (date == null) {
@@ -181,5 +194,27 @@ public class Utils {
         } catch (Exception ignored) { } // for now eat exceptions
         return "";
     }
+
+    public static String objToJSON(Object obj) {
+        try {
+            return obj == null ? null : writer.writeValueAsString(obj);
+        }
+        catch (IOException e) {
+            return null;
+        }
+    }
+
+    public static ObjectMapper getMapper() {
+        return mapper;
+    }
+
+    public static <T> T parseMessage(String message, Class<T> tClass) throws IOException {
+        return mapper.readValue(message, tClass);
+    }
+
+    public static <T> T parseMessage(String message, TypeReference<T> ref) throws IOException {
+        return mapper.readValue(message, ref);
+    }
+
 
 }

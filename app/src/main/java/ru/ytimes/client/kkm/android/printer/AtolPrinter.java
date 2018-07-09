@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 import ru.atol.drivers10.fptr.Fptr;
 import ru.atol.drivers10.fptr.IFptr;
 import ru.ytimes.client.kkm.android.record.CashChangeRecord;
+import ru.ytimes.client.kkm.android.record.ItemType;
 import ru.ytimes.client.main.Utils;
 import ru.ytimes.client.kkm.android.record.AbstractCommandRecord;
 import ru.ytimes.client.kkm.android.record.GuestRecord;
@@ -26,6 +27,7 @@ import ru.ytimes.client.kkm.android.record.OFDChannel;
 import ru.ytimes.client.kkm.android.record.PrintCheckCommandRecord;
 import ru.ytimes.client.kkm.android.record.ReportCommandRecord;
 import ru.ytimes.client.kkm.android.record.VAT;
+import ru.ytimes.client.utils.StringUtils;
 
 /**
  * Created by andrey on 17.06.17.
@@ -532,7 +534,7 @@ public class AtolPrinter implements Printer {
                 BigDecimal priceWithDiscount = price.subtract(discountPosition);
 
                 Log.i (TAG, "Name: " + r.name + ", price=" + price + ", discount = " + discountPosition + ", priceWithDiscount = " + priceWithDiscount);
-                registrationFZ54(r.name, priceWithDiscount.doubleValue(), r.quantity, r.vatValue);
+                registrationFZ54(r.name, priceWithDiscount.doubleValue(), r.quantity, r.vatValue, r.type);
 
                 totalPrice = totalPrice.add(priceWithDiscount.multiply(new BigDecimal(r.quantity)));
             }
@@ -633,7 +635,7 @@ public class AtolPrinter implements Printer {
         throw new PrinterException(0, "Неизвестный тип налога: " + vatValue);
     }
 
-    private void registrationFZ54(String name, double price, double quantity, VAT itemVat) throws PrinterException {
+    private void registrationFZ54(String name, double price, double quantity, VAT itemVat, ItemType type) throws PrinterException {
         fptr.setParam(IFptr.LIBFPTR_PARAM_COMMODITY_NAME, name);
         fptr.setParam(IFptr.LIBFPTR_PARAM_PRICE, price);
         fptr.setParam(IFptr.LIBFPTR_PARAM_QUANTITY, quantity);
@@ -645,6 +647,9 @@ public class AtolPrinter implements Printer {
         int vatNumber = getVatNumber(vatValue);
 
         fptr.setParam(IFptr.LIBFPTR_PARAM_TAX_TYPE, vatNumber);
+        if (ItemType.SERVICE.equals(type)) {
+            fptr.setParam(1212, 4);
+        }
         if (fptr.registration() < 0) {
             checkError(fptr);
         }
@@ -667,6 +672,14 @@ public class AtolPrinter implements Printer {
 
         if (Boolean.TRUE.equals(record.onlyElectronically)) {
             fptr.setParam(IFptr.LIBFPTR_PARAM_RECEIPT_ELECTRONICALLY, true);
+        }
+
+        if (!StringUtils.isEmpty(record.emailFrom)) {
+            fptr.setParam(1117, record.emailFrom);
+        }
+
+        if (!StringUtils.isEmpty(record.billingLocation)) {
+            fptr.setParam(1187, record.billingLocation);
         }
 
         if (fptr.openReceipt() < 1) {
