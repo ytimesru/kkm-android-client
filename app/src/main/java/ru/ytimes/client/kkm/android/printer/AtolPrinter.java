@@ -584,10 +584,6 @@ public class AtolPrinter implements Printer {
         if (record.moneySum == null && record.creditSum == null) {
             throw new PrinterException(0, "Итоговое значение для оплаты не задано");
         }
-        if (record.moneySum != null && record.moneySum == 0.0 &&
-                record.creditSum != null && record.creditSum == 0.0) {
-            throw new PrinterException(0, "Итоговое значение для оплаты не задано");
-        }
         for(ItemRecord r: record.itemList) {
             if (r.name == null || r.name.trim().isEmpty()) {
                 throw new PrinterException(0, "Не задано наименование позиции");
