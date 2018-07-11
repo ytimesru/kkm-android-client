@@ -17,6 +17,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import fi.iki.elonen.NanoHTTPD;
 import ru.ytimes.client.kitchen.KitchenPrinter;
 import ru.ytimes.client.kitchen.Sam4sKitchenPrinter;
+import ru.ytimes.client.kkm.android.printer.AtolEnvdPrinter;
 import ru.ytimes.client.kkm.android.printer.AtolPrinter;
 import ru.ytimes.client.kkm.android.printer.POSPrinter;
 import ru.ytimes.client.kkm.android.printer.Printer;
@@ -342,6 +343,23 @@ public class WebServer extends NanoHTTPD {
 
         if ("TEST".equals(config.model)) {
             printer = new TestPrinter(context);
+        }
+        else if (config.model.startsWith("ATOLENVD")) {
+            AtolPrinter atolPrinter = new AtolEnvdPrinter(context);
+            atolPrinter.setModel(config.model);
+            atolPrinter.setPort(config.port);
+            atolPrinter.setWifiIP(config.wifiIP);
+            atolPrinter.setWifiPort(config.wifiPort);
+            atolPrinter.setVat(config.vat != null ? config.vat : VAT.NO);
+            atolPrinter.setOfdChannel(config.ofd != null ? config.ofd : OFDChannel.PROTO);
+
+            printer = atolPrinter;
+            try {
+                printer.connect(context);
+            }
+            catch (Exception e) {
+                throw new PrinterException(0, e.getMessage());
+            }
         }
         else if (config.model.startsWith("ATOL")) {
             AtolPrinter atolPrinter = new AtolPrinter(context);
