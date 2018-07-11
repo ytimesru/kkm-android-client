@@ -664,6 +664,9 @@ public class AtolPrinter implements Printer {
     private void openCheck(PrintCheckCommandRecord record, int type) throws PrinterException {
         fptr.setParam(IFptr.LIBFPTR_PARAM_RECEIPT_TYPE, type);
         if (record.phone != null && !record.phone.isEmpty()) {
+            if (record.phone.length() == 10 && record.phone.startsWith("9")) {
+                record.phone = "+7" + record.phone;
+            }
             fptr.setParam(1008, record.phone);
         }
         else if (record.email != null && !record.email.isEmpty()) {
