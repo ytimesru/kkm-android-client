@@ -225,6 +225,18 @@ public class MainService extends Service {
             return;
         }
 
+        Printer printer = webServer.getPrinter();
+        if (!printer.isConnected()) {
+            printer.connect(getApplication());
+        }
+
+        processChecksForPrint(printer, accountExternalId, externalBaseUrl);
+        if (externalBaseUrl.contains("samara")) {
+            processChecksForPrint(printer, accountExternalId, "https://cafe.ytimes.ru/template/");
+        }
+    }
+
+    public void processChecksForPrint(Printer printer, String accountExternalId, String externalBaseUrl) throws IOException {
         String url = externalBaseUrl + "util/module/check/listForPrint";
 
         Map<String, String> params = new HashMap<>();
@@ -244,11 +256,6 @@ public class MainService extends Service {
             return;
         }
         showMessage("Receive check list for print: " + s);
-
-        Printer printer = webServer.getPrinter();
-        if (!printer.isConnected()) {
-            printer.connect(getApplication());
-        }
 
         for(DeviceModuleCheckRecord checkRecord: result.getRows()) {
             PrintCheckCommandRecord record = Utils.parseMessage(checkRecord.body, PrintCheckCommandRecord.class);
