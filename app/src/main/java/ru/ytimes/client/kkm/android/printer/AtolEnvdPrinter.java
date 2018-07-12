@@ -103,7 +103,7 @@ public class AtolEnvdPrinter extends AtolPrinter {
                 printText("Скидка: " + r.discountPercent + "%", IFptr.LIBFPTR_ALIGNMENT_RIGHT, IFptr.LIBFPTR_TW_CHARS);
             }
 
-            totalSum.add(total);
+            totalSum = totalSum.add(total);
         }
         printBoldText("ИТОГО: " + totalSum, IFptr.LIBFPTR_ALIGNMENT_RIGHT, IFptr.LIBFPTR_TW_CHARS);
         printText("");
